@@ -7,8 +7,10 @@
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?logo=jupyter)](https://jupyter.org/)
 [![RDKit](https://img.shields.io/badge/RDKit-2024-green)](https://www.rdkit.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
-[![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue?logo=githubactions)](https://github.com/features/actions)
-
+[![CI](https://github.com/omar-hamouda1/biochemist-python/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-hamouda1/biochemist-python/actions/workflows/ci.yml)
+[![Conda](https://img.shields.io/badge/conda-environment-green?logo=anaconda)](environment.yml)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Tests](https://img.shields.io/badge/tests-19%20passed-brightgreen)](tests/)
 ---
 
 ## 📌 Overview
@@ -103,9 +105,25 @@ jupyter lab
 | 5 | 12U | -9.35 | ✅ |
 
 ### MD Simulation Highlights
-- **System**: 13U–Trypsin complex in explicit water
-- **Key binding residues**: Identified via ProLIF fingerprinting
-- **Stability**: Confirmed by RMSD convergence and MMPBSA analysis
+
+**System:** 13U–Trypsin complex in explicit TIP3P water + 0.15 M NaCl (24,590 atoms, 64.2 Å box).
+
+**Simulation:** 5 ns production run on NVIDIA Tesla T4 GPU (196 ns/day).
+
+**Stability:**
+- Protein backbone RMSD: **0.84 Å**
+- Ligand RMSD: **1.57 Å**
+- Ligand RMSF: **1.07 Å** (0/65 atoms exceed 3 Å)
+
+**Binding Energy (MM-PBSA):**
+- **ΔG_binding = −32.13 ± 17.22 kcal/mol**
+- VdW contribution: −34.32 kcal/mol
+- Electrostatics: −11.22 kcal/mol
+
+**Key Binding Residues (ProLIF, occupancy > 70%):**
+- ASP171, SER172, SER192 — VdW + H-bond (78%)
+- GLY196 — VdW (74%)
+- **TRP193** — Anchor residue (VdW, 70%, ΔG = −3.03 kcal/mol)
 
 ---
 
