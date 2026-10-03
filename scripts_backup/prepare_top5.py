@@ -18,7 +18,8 @@ def convert_pose_to_pdb(ligand_id, pdbqt_pose):
     """PDBQT → PDB using obabel."""
     temp_pdb = os.path.join(tempfile.gettempdir(), f"{ligand_id}_raw.pdb")
     subprocess.run(
-        ["obabel", "-ipdbqt", pdbqt_pose, "-opdb", "-O", temp_pdb, "-h"], capture_output=True
+        ["obabel", "-ipdbqt", pdbqt_pose, "-opdb", "-O", temp_pdb, "-h"],
+        capture_output=True
     )
     return temp_pdb if os.path.exists(temp_pdb) else None
 
@@ -29,22 +30,22 @@ def method_template(ligand_id, temp_pdb, template_sdf, output_sdf):
         pose = Chem.MolFromPDBFile(temp_pdb, removeHs=False, sanitize=False)
         if pose is None:
             return False, "Cannot read PDB"
-
+        
         pose_noH = Chem.RemoveHs(pose, sanitize=False)
-
+        
         template = Chem.MolFromMolFile(template_sdf, removeHs=False)
         if template is None:
             return False, "Cannot read template"
-
+        
         template_noH = Chem.RemoveHs(template)
-
+        
         if pose_noH.GetNumAtoms() != template_noH.GetNumAtoms():
-            return False, "Atom mismatch"
-
+            return False, f"Atom mismatch"
+        
         final_mol = AllChem.AssignBondOrdersFromTemplate(template_noH, pose_noH)
         final_mol = Chem.AddHs(final_mol)
         Chem.SanitizeMol(final_mol)
-
+        
         writer = Chem.SDWriter(output_sdf)
         writer.write(final_mol)
         writer.close()
@@ -60,13 +61,13 @@ def method_auto(ligand_id, temp_pdb, output_sdf):
             mol = Chem.MolFromPDBFile(temp_pdb, removeHs=False, sanitize=False)
             if mol is None:
                 continue
-
+            
             mol_noH = Chem.RemoveHs(mol)
             rdDetermineBonds.DetermineBonds(mol_noH, charge=charge)
-
+            
             mol_final = Chem.AddHs(mol_noH)
             Chem.SanitizeMol(mol_final)
-
+            
             writer = Chem.SDWriter(output_sdf)
             writer.write(mol_final)
             writer.close()
@@ -82,34 +83,34 @@ success, failed = [], []
 
 for lid in top_5:
     pdbqt = f"docking/results/{lid}_out.pdbqt"
-
+    
     if not os.path.exists(pdbqt):
         print(f"  FAIL {lid}: pose not found")
         failed.append(lid)
         continue
-
+    
     # Convert PDBQT → PDB once
     temp_pdb = convert_pose_to_pdb(lid, pdbqt)
     if temp_pdb is None:
         print(f"  FAIL {lid}: obabel failed")
         failed.append(lid)
         continue
-
-    output_sdf = f"{output_dir}/{lid}_fixed.sd"
-
+    
+    output_sdf = f"{output_dir}/{lid}_fixed.sdf"
+    
     # Determine template
     if lid == "13U":
-        template = "pdb/ligand.sd"
+        template = "pdb/ligand.sdf"
     else:
-        template = f"ligands/{lid}.sd"
-
+        template = f"ligands/{lid}.sdf"
+    
     # ─── Try 1: Template method ───
     ok, method = method_template(lid, temp_pdb, template, output_sdf)
-
+    
     # ─── Try 2: Auto method (if template failed) ───
     if not ok:
         ok, method = method_auto(lid, temp_pdb, output_sdf)
-
+    
     if ok:
         print(f"  OK   {lid:5s} via {method}")
         success.append(lid)

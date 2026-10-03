@@ -60,17 +60,15 @@ def calculate_lipinski_rules(smiles_list: List[str]) -> pd.DataFrame:
 
         passes_lipinski = (mw <= 500) and (logp <= 5) and (hbd <= 5) and (hba <= 10)
 
-        results.append(
-            {
-                "SMILES": smiles,
-                "Valid": True,
-                "MW": round(mw, 2),
-                "LogP": round(logp, 2),
-                "HBD": hbd,
-                "HBA": hba,
-                "Passes_Ro5": passes_lipinski,
-            }
-        )
+        results.append({
+            "SMILES": smiles,
+            "Valid": True,
+            "MW": round(mw, 2),
+            "LogP": round(logp, 2),
+            "HBD": hbd,
+            "HBA": hba,
+            "Passes_Ro5": passes_lipinski,
+        })
 
     return pd.DataFrame(results)
 

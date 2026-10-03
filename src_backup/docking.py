@@ -11,9 +11,11 @@ Example
 >>> print(f"Best affinity: {affinities[0]:.2f} kcal/mol")
 """
 
+import os
 import re
+import subprocess
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional, Tuple
 
 import pandas as pd
 

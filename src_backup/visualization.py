@@ -11,6 +11,9 @@ Example
 >>> view.show()
 """
 
+from pathlib import Path
+from typing import Optional
+
 try:
     import py3Dmol
 except ImportError:
@@ -21,7 +24,8 @@ def _check_py3dmol():
     """Raise ImportError if py3Dmol is not installed."""
     if py3Dmol is None:
         raise ImportError(
-            "py3Dmol is required for visualization. " "Install it with: pip install py3Dmol"
+            "py3Dmol is required for visualization. "
+            "Install it with: pip install py3Dmol"
         )
 
 

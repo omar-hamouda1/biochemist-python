@@ -13,6 +13,7 @@ Output
     results/top_hits_summary.csv
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -61,16 +62,14 @@ def load_prolif_results(results_dir: str = "docking/results/fixed") -> pd.DataFr
 
     records = []
     for csv_file in results_path.glob("*_prolif.csv"):
-        ligand_id = csv_file.stem.replace("_proli", "")
+        ligand_id = csv_file.stem.replace("_prolif", "")
         try:
             df = pd.read_csv(csv_file)
             n_interactions = len(df.columns) if len(df) > 0 else 0
-            records.append(
-                {
-                    "ligand_id": ligand_id,
-                    "n_interactions": n_interactions,
-                }
-            )
+            records.append({
+                "ligand_id": ligand_id,
+                "n_interactions": n_interactions,
+            })
         except Exception as e:
             print(f"  [WARN] Cannot read {csv_file.name}: {e}")
 
@@ -133,7 +132,7 @@ def main():
     df_final.to_csv(output_path, index=False)
 
     # Print summary
-    print("\n3. Summary (Top 10):")
+    print(f"\n3. Summary (Top 10):")
     print("-" * 60)
     print(df_final.head(10).to_string(index=False))
     print(f"\n  Total ligands: {len(df_final)}")
