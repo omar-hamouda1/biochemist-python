@@ -1,0 +1,42 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy-book:
+    name: Build book
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Additional info about the build
+        shell: bash
+        run: |
+          uname -a
+          df -h
+          ulimit -a
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          python-version: 3.11
+          activate-environment: biochemist-python
+          environment-file: requirements.yaml
+
+      - name: Build the book
+        shell: bash -l {0}
+        run: |
+          pip install docutils --upgrade
+          jupyter labextension install @jupyter-widgets/jupyterlab-manager
+          jupyter labextension install nglview-js-widgets
+          jupyter-book build biochemist-python
+
+      - name: GitHub Pages action
+        uses: peaceiris/actions-gh-pages@v3.6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: biochemist-python/_build/html

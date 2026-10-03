@@ -1,0 +1,72 @@
+name: CI — Biochemist Python Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.yml
+          activate-environment: biochem
+          python-version: "3.11"
+          auto-activate-base: false
+          miniforge-version: latest
+
+      - name: Display environment info
+        run: |
+          conda info
+          python --version
+          conda list | head -20
+
+      - name: Run unit tests
+        run: |
+          pytest tests/ -v --tb=short
+
+      - name: Lint source code
+        run: |
+          pip install flake8
+          flake8 src/ scripts/ --max-line-length=100 --ignore=E501,W503,E402
+
+  notebooks-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate notebook JSON
+        run: |
+          pip install nbformat
+          python -c "
+          import nbformat, glob, sys
+          errors = 0
+          for nb_path in sorted(glob.glob('notebooks/*.ipynb')):
+              try:
+                  with open(nb_path) as f:
+                      nbformat.read(f, as_version=4)
+                  print(f'  OK: {nb_path}')
+              except Exception as e:
+                  print(f'  FAIL: {nb_path} — {e}')
+                  errors += 1
+          if errors:
+              sys.exit(1)
+          print(f'\nAll {len(glob.glob(\"notebooks/*.ipynb\"))} notebooks valid.')
+          "

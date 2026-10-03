@@ -1,0 +1,5 @@
+ligand,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1
+protein,LEU99.A,ASP189.A,SER190.A,GLN192.A,SER195.A,SER214.A,TRP215.A,GLY219.A
+interaction,VdWContact,VdWContact,VdWContact,VdWContact,VdWContact,VdWContact,VdWContact,VdWContact
+Frame,,,,,,,,
+0,True,True,True,True,True,True,True,True

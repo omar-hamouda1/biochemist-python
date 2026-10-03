@@ -1,0 +1,22 @@
+source leaprc.protein.ff14SB
+source leaprc.gaff2
+
+loadamberparams /content/md_work/ligand.frcmod
+ligand = loadmol2 /content/md_work/ligand.mol2
+
+protein = loadpdb /content/md_work/protein_amber_noconect.pdb
+
+# Disulfide bonds
+bond protein.7.SG   protein.137.SG
+bond protein.25.SG  protein.41.SG
+bond protein.109.SG protein.210.SG
+bond protein.116.SG protein.183.SG
+bond protein.148.SG protein.162.SG
+bond protein.173.SG protein.197.SG
+
+complex = combine {protein ligand}
+
+saveamberparm complex /content/md_work/complex.prmtop /content/md_work/complex.inpcrd
+saveamberparm protein /content/md_work/protein.prmtop /content/md_work/protein.inpcrd
+saveamberparm ligand  /content/md_work/ligand.prmtop  /content/md_work/ligand.inpcrd
+quit

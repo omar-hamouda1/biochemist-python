@@ -1,0 +1,17 @@
+format: jb-book
+root: chapters/setup
+chapters:
+- file: chapters/workshop_schedule
+- file: chapters/introduction
+- file: chapters/File_Parsing
+- file: chapters/Processing_Multiple_Files_and_Writing_Files
+- file: chapters/Working_with_Pandas
+- file: chapters/Linear_Regression
+- file: chapters/Creating_Plots_in_Jupyter_Notebooks
+- file: chapters/nonlinear_regression_part_1
+- file: chapters/nonlinear_regression_part_2
+- file: chapters/biopython_mmcif
+- file: chapters/rcsb_api
+- file: chapters/MolVis_with_iCN3D
+- file: chapters/EC_class_ligands_search
+- file: chapters/binding_site_investigation

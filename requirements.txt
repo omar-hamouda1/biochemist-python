@@ -1,0 +1,21 @@
+# ─── Biochemist Python — pip requirements ─────────────────────────────
+# For users who prefer pip over conda.
+# Note: Some packages (rdkit, openmm) install better via conda.
+# See environment.yml for the recommended conda setup.
+# ──────────────────────────────────────────────────────────────────────
+
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+biopython>=1.81
+mdanalysis>=2.6.1
+prolif>=2.0.0
+icn3dpy>=2.0.1
+rcsbsearchapi>=1.7.0
+pdb2pqr>=3.6.1
+py3Dmol>=2.0.0
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+pytest>=7.0.0

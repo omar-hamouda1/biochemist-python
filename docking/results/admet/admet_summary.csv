@@ -1,0 +1,5 @@
+Ligand,MW,LogP,HBD,HBA,TPSA,RotB,Lipinski_Violations,Lipinski_Verdict,Veber_Verdict,PAINS_Alerts
+607,457.45,-2.01,4,7,209.63,8,0,Excellent,Fail,0
+BAH,366.38,-3.45,8,4,201.04,6,1,Acceptable,Fail,0
+13U,413.57,2.28,4,4,111.31,7,0,Excellent,Pass,0
+12U,366.28,1.5,0,2,90.47,2,0,Excellent,Pass,0

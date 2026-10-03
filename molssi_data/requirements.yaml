@@ -1,0 +1,28 @@
+name: biochemist-python
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - jupyter-book
+  - pandas
+  - rdkit
+  - numpy
+  - notebook
+  - scipy
+  - biopython
+  - bokeh
+  - nglview==3.0.8
+  - seaborn
+  - sphinx
+  - ipywidgets>8.0
+  - nodejs
+  - openbabel
+  - mdanalysis
+  - vina
+  - prolif
+  - pip:
+    - icn3dpy
+    - rcsbsearchapi
+    - pdb2pqr

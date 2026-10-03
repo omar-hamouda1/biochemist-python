@@ -1,0 +1,26 @@
+Interaction,Occupancy_%
+"('UNK224.0', 'ASP171.0', 'VdWContact')",78.0
+"('UNK224.0', 'ASP171.0', 'HBDonor')",78.0
+"('UNK224.0', 'SER172.0', 'VdWContact')",78.0
+"('UNK224.0', 'SER192.0', 'HBDonor')",78.0
+"('UNK224.0', 'SER192.0', 'VdWContact')",78.0
+"('UNK224.0', 'GLY196.0', 'VdWContact')",74.0
+"('UNK224.0', 'TRP193.0', 'VdWContact')",70.0
+"('UNK224.0', 'SER172.0', 'HBDonor')",70.0
+"('UNK224.0', 'GLY194.0', 'VdWContact')",64.0
+"('UNK224.0', 'GLY196.0', 'HBAcceptor')",52.0
+"('UNK224.0', 'HID40.0', 'VdWContact')",38.0
+"('UNK224.0', 'GLN174.0', 'Hydrophobic')",36.0
+"('UNK224.0', 'LEU81.0', 'VdWContact')",36.0
+"('UNK224.0', 'CYX197.0', 'VdWContact')",34.0
+"('UNK224.0', 'GLN174.0', 'VdWContact')",28.0
+"('UNK224.0', 'ASN79.0', 'VdWContact')",26.0
+"('UNK224.0', 'GLN155.0', 'VdWContact')",26.0
+"('UNK224.0', 'SER177.0', 'VdWContact')",26.0
+"('UNK224.0', 'THR80.0', 'VdWContact')",12.0
+"('UNK224.0', 'CYX173.0', 'VdWContact')",12.0
+"('UNK224.0', 'GLY204.0', 'VdWContact')",8.0
+"('UNK224.0', 'SER195.0', 'VdWContact')",6.0
+"('UNK224.0', 'GLN174.0', 'HBAcceptor')",4.0
+"('UNK224.0', 'GLY196.0', 'HBDonor')",4.0
+"('UNK224.0', 'GLY204.0', 'HBDonor')",4.0

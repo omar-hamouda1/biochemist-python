@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Protein-Ligand Viewer</title>
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #f0f0f0; font-family: Arial, sans-serif; }
+        #container { width: 100vw; height: 100vh; position: relative; }
+        #label { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 8px; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div id="label">
+        <h2 style="margin-top: 0;">Trypsin (2ZQ2) Binding Site</h2>
+        <p><strong>Protein:</strong> Cartoon (Spectrum)<br><strong>Ligand (13U):</strong> Sticks (Green Carbon)</p>
+        <p><em>Use your mouse to rotate, scroll to zoom.</em></p>
+    </div>
+    <div id="container" class="viewer_3Dmoljs" data-backgroundcolor="0xeeeeee"></div>
+    
+    <script>
+        $(document).ready(function() {
+            let viewer = $3Dmol.createViewer('container');
+            
+            // Fetch protein
+            $.get('../pdb/protein_2zq2.pdb', function(data) {
+                viewer.addModel(data, 'pdb');
+                viewer.setStyle({model: 0}, {cartoon: {color: 'spectrum'}});
+                
+                // Fetch ligand
+                $.get('../pdb/ligand_A.pdb', function(data2) {
+                    viewer.addModel(data2, 'pdb');
+                    viewer.setStyle({model: 1}, {stick: {colorscheme: 'greenCarbon', radius: 0.2}});
+                    
+                    // Zoom to ligand
+                    viewer.zoomTo({model: 1});
+                    viewer.render();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

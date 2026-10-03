@@ -1,0 +1,5 @@
+ligand,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1,UNL1
+protein,PHE41.A,HIS57.A,SER122.A,LEU123.A,PRO124.A,ASP189.A,ASP189.A,SER190.A,GLN192.A,GLN192.A,SER195.A,LEU209.A,VAL213.A,TRP215.A,GLY219.A,CYS220.A
+interaction,VdWContact,VdWContact,VdWContact,VdWContact,VdWContact,Cationic,VdWContact,VdWContact,Hydrophobic,VdWContact,VdWContact,VdWContact,VdWContact,VdWContact,VdWContact,Cationic
+Frame,,,,,,,,,,,,,,,,
+0,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True,True
