@@ -1,6 +1,3 @@
-cd ~/biochemist-python_ORGANIZED
-
-cat > environment.yml << 'EOF'
 name: biochem
 channels:
   - conda-forge
@@ -33,7 +30,3 @@ dependencies:
     - icn3dpy>=2.0.1
     - rcsbsearchapi>=1.7.0
     - pdb2pqr>=3.6.1
-EOF
-
-echo "✅ تم التحديث!"
-cat environment.yml
