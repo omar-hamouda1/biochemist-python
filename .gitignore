@@ -60,3 +60,9 @@ Thumbs.db
 # ─── Logs ────────────────────────────────────────────────────────────
 *.log
 *.error.log
+
+# ─── Backup Folders ───
+src_backup/
+scripts_backup/
+*_backup/
+*.bak
