@@ -49,7 +49,7 @@ This project implements a **complete computational drug discovery pipeline** des
 
 ```bash
 # 1. Clone
-git clone https://github.com/<your-username>/biochemist-python.git
+git clone https://github.com/omar-hamouda1/biochemist-python.git
 cd biochemist-python
 
 # 2. Create environment
@@ -191,8 +191,8 @@ If you use this pipeline in your research, please cite:
 @software{hamouda2024biochemist,
   author  = {Hamouda, Omar},
   title   = {Biochemist Python: Computational Drug Discovery Pipeline},
-  year    = {2026},
-  url     = {https://github.com/<your-username>/biochemist-python},
+  year    = {2024},
+  url     = {https://github.com/omar-hamouda1/biochemist-python},
   note    = {A complete workshop from Python basics to MD simulation}
 }
 ```
@@ -213,7 +213,7 @@ If you use this pipeline in your research, please cite:
 ## 👤 Author
 
 **Omar Hamouda**  
-Computational Chemist | MolSSI Workshop Participant
+B.Sc. Chemistry, Faculty of Science — Suez Canal University
 
 ---
 

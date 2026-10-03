@@ -27,7 +27,7 @@ source ~/.bashrc
 ## Step 2: Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/biochemist-python.git
+git clone https://github.com/omar-hamouda1/biochemist-python.git
 cd biochemist-python
 ```
 
