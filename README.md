@@ -191,7 +191,7 @@ If you use this pipeline in your research, please cite:
 @software{hamouda2024biochemist,
   author  = {Hamouda, Omar},
   title   = {Biochemist Python: Computational Drug Discovery Pipeline},
-  year    = {2024},
+  year    = {2025},
   url     = {https://github.com/omar-hamouda1/biochemist-python},
   note    = {A complete workshop from Python basics to MD simulation}
 }
