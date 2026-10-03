@@ -13,8 +13,8 @@ class TestLipinskiRules:
         df = calculate_lipinski_rules(smiles)
 
         assert len(df) == 1
-        assert df.iloc[0]["Valid"] is True
-        assert df.iloc[0]["Passes_Ro5"] is True
+        assert bool(df.iloc[0]["Valid"]) is True
+        assert bool(df.iloc[0]["Passes_Ro5"]) is True
         assert 170 < df.iloc[0]["MW"] < 190
 
     def test_invalid_smiles(self):
@@ -23,7 +23,7 @@ class TestLipinskiRules:
         df = calculate_lipinski_rules(smiles)
 
         assert len(df) == 1
-        assert df.iloc[0]["Valid"] is False
+        assert bool(df.iloc[0]["Valid"]) is False
 
     def test_multiple_molecules(self):
         """Test batch processing of multiple molecules."""
@@ -44,7 +44,7 @@ class TestLipinskiRules:
                   "C(=O)C(CC(C)C)NC(=O)C1C"]
         df = calculate_lipinski_rules(smiles)
 
-        if df.iloc[0]["Valid"]:
+        if bool(df.iloc[0]["Valid"]):
             assert df.iloc[0]["MW"] > 500
 
     def test_empty_list(self):
