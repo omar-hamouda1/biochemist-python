@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 
 
-def load_docking_results(path: str = "docking/results/affinities_full.csv") -> pd.DataFrame:
+def load_docking_results(path: str = "docking/results/affinities_recovered_111.csv") -> pd.DataFrame:
     """Load and clean docking affinity results.
 
     Parameters
@@ -41,40 +41,35 @@ def load_docking_results(path: str = "docking/results/affinities_full.csv") -> p
     return df
 
 
-def load_prolif_results(results_dir: str = "docking/results/fixed") -> pd.DataFrame:
-    """Load ProLIF interaction data for fixed ligands.
+def load_prolif_results(path: str = "docking/results/prolif_summary.csv") -> pd.DataFrame:
+    """Load ProLIF summary results.
 
     Parameters
     ----------
-    results_dir : str
-        Directory containing ``*_prolif.csv`` files.
+    path : str
+        Path to ``prolif_summary.csv``.
 
     Returns
     -------
     pd.DataFrame
         DataFrame with columns: ``ligand_id``, ``n_interactions``.
     """
-    results_path = Path(results_dir)
+    results_path = Path(path)
+
     if not results_path.exists():
-        print(f"  [WARN] ProLIF results not found: {results_dir}")
+        print(f"  [WARN] ProLIF results not found: {path}")
         return pd.DataFrame()
 
-    records = []
-    for csv_file in results_path.glob("*_prolif.csv"):
-        ligand_id = csv_file.stem.replace("_proli", "")
-        try:
-            df = pd.read_csv(csv_file)
-            n_interactions = len(df.columns) if len(df) > 0 else 0
-            records.append(
-                {
-                    "ligand_id": ligand_id,
-                    "n_interactions": n_interactions,
-                }
-            )
-        except Exception as e:
-            print(f"  [WARN] Cannot read {csv_file.name}: {e}")
+    df = pd.read_csv(results_path)
 
-    result = pd.DataFrame(records)
+    required = {"ligand_id", "n_interactions"}
+    missing = required - set(df.columns)
+
+    if missing:
+        print(f"  [WARN] ProLIF summary missing columns: {sorted(missing)}")
+        return pd.DataFrame()
+
+    result = df[["ligand_id", "n_interactions"]].copy()
     print(f"  [OK] ProLIF results: {len(result)} ligands loaded")
     return result
 
@@ -101,7 +96,10 @@ def merge_results(df_docking: pd.DataFrame, df_prolif: pd.DataFrame) -> pd.DataF
 
     if not df_prolif.empty:
         df = df.merge(df_prolif, on="ligand_id", how="left")
-        df["n_interactions"] = df["n_interactions"].fillna(0).astype(int)
+        df["n_interactions"] = pd.to_numeric(
+            df["n_interactions"],
+            errors="coerce",
+        )
 
     df = df.sort_values("affinity")
     return df

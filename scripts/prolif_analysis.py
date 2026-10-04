@@ -6,12 +6,12 @@ from collections import Counter
 import pandas as pd
 
 print("=" * 70)
-print("  ProLIF Analysis: Top 4 Docked Ligands")
+print("  ProLIF Analysis: Top 5 Docked Ligands")
 print("=" * 70)
 
 PROTEIN = "pdb/protein_h.pdb"
 FIXED_DIR = "docking/results/fixed"
-LIGANDS = ["13U", "BAH", "607", "12U"]
+LIGANDS = ["13U", "R11", "BAH", "607", "12U"]
 
 # ─── Load protein ───
 print("\n1. Loading protein...")
@@ -116,7 +116,7 @@ summary_data = []
 for lid, df in all_results.items():
     residues = ligand_residues[lid]
 
-    aff_df = pd.read_csv("docking/results/affinities_full.csv")
+    aff_df = pd.read_csv("docking/results/affinities_recovered_111.csv")
     aff = aff_df[aff_df["ligand_id"] == lid]["affinity"].values
     affinity = aff[0] if len(aff) > 0 else None
 
