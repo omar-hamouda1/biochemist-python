@@ -66,3 +66,6 @@ src_backup/
 scripts_backup/
 *_backup/
 *.bak
+
+# Generated ProLIF pose files
+docking/results/fixed/*.sd

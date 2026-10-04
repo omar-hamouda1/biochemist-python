@@ -38,6 +38,18 @@ def method_template(ligand_id, temp_pdb, template_sdf, output_sdf):
 
         template_noH = Chem.RemoveHs(template)
 
+        remaining_h = [
+            atom.GetIdx()
+            for atom in template_noH.GetAtoms()
+            if atom.GetSymbol() == "H"
+        ]
+
+        if remaining_h:
+            editable = Chem.RWMol(template_noH)
+            for idx in sorted(remaining_h, reverse=True):
+                editable.RemoveAtom(idx)
+            template_noH = editable.GetMol()
+
         if pose_noH.GetNumAtoms() != template_noH.GetNumAtoms():
             return False, "Atom mismatch"
 
@@ -101,7 +113,7 @@ for lid in top_5:
     if lid == "13U":
         template = "pdb/ligand.sd"
     else:
-        template = f"ligands/{lid}.sd"
+        template = f"ligands/{lid}.sdf"
 
     # ─── Try 1: Template method ───
     ok, method = method_template(lid, temp_pdb, template, output_sdf)
