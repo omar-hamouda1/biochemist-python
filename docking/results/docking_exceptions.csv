@@ -1,0 +1,7 @@
+ligand_id,stage,status,reason
+0ZW,smaina_input,unresolved,Boron-containing PDBQT rejected by smina
+0ZX,smaina_input,unresolved,Boron-containing PDBQT rejected by smina
+0ZY,smaina_input,unresolved,Boron-containing PDBQT rejected by smina
+PPB,smaina_input,unresolved,Boron-containing PDBQT rejected by smina
+BAZ,preparation,unresolved,Zn2+ complex; Gasteiger charge assignment failed
+BOZ,preparation,unresolved,Zn2+ complex; Gasteiger charge assignment failed
