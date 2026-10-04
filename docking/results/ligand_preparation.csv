@@ -1,0 +1,118 @@
+ligand_id,status,method,message,pdbqt_bytes
+0CA,already_valid,existing,Existing PDBQT kept,4601
+0CB,already_valid,existing,Existing PDBQT kept,4593
+0IV,already_valid,existing,Existing PDBQT kept,4304
+0KV,already_valid,existing,Existing PDBQT kept,4304
+0ZG,already_valid,existing,Existing PDBQT kept,3623
+0ZW,prepared,meeko,Open Babel failed: 0 molecules converted,4368
+0ZX,prepared,meeko,Open Babel failed: 0 molecules converted,4040
+0ZY,prepared,meeko,Open Babel failed: 0 molecules converted,3871
+10U,already_valid,existing,Existing PDBQT kept,3412
+11U,already_valid,existing,Existing PDBQT kept,3492
+12U,already_valid,existing,Existing PDBQT kept,3572
+132,prepared,meeko,Open Babel failed: 0 molecules converted,3022
+13U,already_valid,existing,Existing PDBQT kept,3652
+169,already_valid,existing,Existing PDBQT kept,4209
+1NJ,already_valid,existing,Existing PDBQT kept,5144
+312,already_valid,existing,Existing PDBQT kept,4187
+32U,already_valid,existing,Existing PDBQT kept,3812
+334,prepared,meeko,Open Babel failed: 0 molecules converted,2425
+3YH,already_valid,existing,Existing PDBQT kept,3975
+45U,already_valid,existing,Existing PDBQT kept,3332
+46U,already_valid,existing,Existing PDBQT kept,3412
+49U,already_valid,existing,Existing PDBQT kept,3332
+50U,already_valid,existing,Existing PDBQT kept,3412
+607,already_valid,existing,Existing PDBQT kept,4218
+623,already_valid,existing,Existing PDBQT kept,3701
+653,already_valid,existing,Existing PDBQT kept,3654
+655,already_valid,existing,Existing PDBQT kept,3010
+656,already_valid,existing,Existing PDBQT kept,3110
+678,prepared,meeko,Open Babel failed: 0 molecules converted,2769
+688,already_valid,existing,Existing PDBQT kept,4053
+693,already_valid,existing,Existing PDBQT kept,3976
+696,already_valid,existing,Existing PDBQT kept,2928
+6VZ,already_valid,existing,Existing PDBQT kept,4398
+6W4,already_valid,existing,Existing PDBQT kept,4540
+6WH,already_valid,existing,Existing PDBQT kept,4509
+711,already_valid,existing,Existing PDBQT kept,3909
+762,prepared,meeko,Open Babel failed: 0 molecules converted,2906
+780,already_valid,existing,Existing PDBQT kept,2928
+783,already_valid,existing,Existing PDBQT kept,3219
+785,already_valid,existing,Existing PDBQT kept,2930
+806,already_valid,existing,Existing PDBQT kept,4020
+847,prepared,meeko,Open Babel failed: 0 molecules converted,3196
+907,prepared,meeko,Open Babel failed: 0 molecules converted,2425
+950,already_valid,existing,Existing PDBQT kept,3190
+972,prepared,meeko,Open Babel failed: 0 molecules converted,2890
+974,already_valid,existing,Existing PDBQT kept,4908
+991,prepared,meeko,Open Babel failed: 0 molecules converted,2938
+A2C,already_valid,existing,Existing PDBQT kept,3738
+ABB,already_valid,existing,Existing PDBQT kept,4025
+ANH,already_valid,existing,Existing PDBQT kept,3992
+BAB,already_valid,existing,Existing PDBQT kept,3487
+BAH,already_valid,existing,Existing PDBQT kept,3889
+BAK,already_valid,existing,Existing PDBQT kept,3487
+BAO,already_valid,existing,Existing PDBQT kept,3330
+BAZ,failed,none,Open Babel: 0 molecules converted; Meeko: cannot access local variable 'charges' where it is not associated with a value,0
+BBA,already_valid,existing,Existing PDBQT kept,3491
+BHC,already_valid,existing,Existing PDBQT kept,3661
+BOZ,failed,none,Open Babel: 0 molecules converted; Meeko: cannot access local variable 'charges' where it is not associated with a value,0
+BPO,already_valid,existing,Existing PDBQT kept,3971
+BR6,prepared,meeko,Open Babel failed: 0 molecules converted,2013
+BRV,prepared,meeko,Open Babel failed: 0 molecules converted,1989
+BX3,already_valid,existing,Existing PDBQT kept,4107
+BZY,already_valid,existing,Existing PDBQT kept,4182
+CCR,already_valid,existing,Existing PDBQT kept,5381
+CR3,already_valid,existing,Existing PDBQT kept,3010
+CR9,already_valid,existing,Existing PDBQT kept,3299
+CTA,already_valid,existing,Existing PDBQT kept,6144
+DJY,already_valid,existing,Existing PDBQT kept,4753
+DX9,already_valid,existing,Existing PDBQT kept,4027
+E64,already_valid,existing,Existing PDBQT kept,4241
+ESI,already_valid,existing,Existing PDBQT kept,1724
+FD1,already_valid,existing,Existing PDBQT kept,4299
+FD2,already_valid,existing,Existing PDBQT kept,4349
+FD3,already_valid,existing,Existing PDBQT kept,3895
+FD4,already_valid,existing,Existing PDBQT kept,4104
+FO9,already_valid,existing,Existing PDBQT kept,3251
+GOZ,already_valid,existing,Existing PDBQT kept,3733
+GP8,already_valid,existing,Existing PDBQT kept,3171
+GZC,already_valid,existing,Existing PDBQT kept,4059
+I4Q,already_valid,existing,Existing PDBQT kept,3221
+IGN,already_valid,existing,Existing PDBQT kept,4301
+IMA,already_valid,existing,Existing PDBQT kept,4850
+IN4,already_valid,existing,Existing PDBQT kept,3623
+IYR,already_valid,existing,Existing PDBQT kept,2212
+J3I,already_valid,existing,Existing PDBQT kept,3649
+J5K,already_valid,existing,Existing PDBQT kept,3414
+K73,already_valid,existing,Existing PDBQT kept,3651
+LXW,already_valid,existing,Existing PDBQT kept,3736
+M35,already_valid,existing,Existing PDBQT kept,4185
+M6Q,already_valid,existing,Existing PDBQT kept,3414
+MEL,already_valid,existing,Existing PDBQT kept,4059
+MID,already_valid,existing,Existing PDBQT kept,4379
+MXH,already_valid,existing,Existing PDBQT kept,5650
+MZE,already_valid,existing,Existing PDBQT kept,5731
+PMJ,already_valid,existing,Existing PDBQT kept,5109
+PNT,already_valid,existing,Existing PDBQT kept,3579
+PPB,prepared,meeko,Open Babel failed: 0 molecules converted,3735
+PR1,already_valid,existing,Existing PDBQT kept,3654
+R11,already_valid,existing,Existing PDBQT kept,3751
+RPR,already_valid,existing,Existing PDBQT kept,4483
+RWJ,already_valid,existing,Existing PDBQT kept,3494
+T87,already_valid,existing,Existing PDBQT kept,4805
+TFN,already_valid,existing,Existing PDBQT kept,4774
+TL1,already_valid,existing,Existing PDBQT kept,3491
+TL2,already_valid,existing,Existing PDBQT kept,3491
+TL3,already_valid,existing,Existing PDBQT kept,3490
+TL4,already_valid,existing,Existing PDBQT kept,3491
+TYI,already_valid,existing,Existing PDBQT kept,2293
+UIB,already_valid,existing,Existing PDBQT kept,3766
+UIP,already_valid,existing,Existing PDBQT kept,3620
+UIQ,already_valid,existing,Existing PDBQT kept,3749
+UIR,already_valid,existing,Existing PDBQT kept,3650
+UIZ,already_valid,existing,Existing PDBQT kept,4052
+VN1,already_valid,existing,Existing PDBQT kept,4613
+XPE,already_valid,existing,Existing PDBQT kept,5369
+ZAP,already_valid,existing,Existing PDBQT kept,3495
+ZEN,prepared,meeko,Open Babel failed: 0 molecules converted,3224
