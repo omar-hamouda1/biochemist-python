@@ -6,7 +6,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, rdDetermineBonds
 
 # ─── Load docking results ───
-df_all = pd.read_csv("docking/results/affinities_full.csv")
+df_all = pd.read_csv("docking/results/affinities_recovered_111.csv")
 top_5 = df_all.head(5)["ligand_id"].tolist()
 print(f"Top 5 ligands: {top_5}\n")
 

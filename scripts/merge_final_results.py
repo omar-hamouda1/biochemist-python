@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 
 
-def load_docking_results(path: str = "docking/results/affinities_full.csv") -> pd.DataFrame:
+def load_docking_results(path: str = "docking/results/affinities_recovered_111.csv") -> pd.DataFrame:
     """Load and clean docking affinity results.
 
     Parameters

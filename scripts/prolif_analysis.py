@@ -116,7 +116,7 @@ summary_data = []
 for lid, df in all_results.items():
     residues = ligand_residues[lid]
 
-    aff_df = pd.read_csv("docking/results/affinities_full.csv")
+    aff_df = pd.read_csv("docking/results/affinities_recovered_111.csv")
     aff = aff_df[aff_df["ligand_id"] == lid]["affinity"].values
     affinity = aff[0] if len(aff) > 0 else None
 
