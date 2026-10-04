@@ -13,6 +13,8 @@ dependencies:
   - seaborn>=0.12.0
   - biopython>=1.81
   - rdkit>=2023.09.1
+  - openbabel=3.1.1
+  - smina=2020.12.10
   - mdanalysis>=2.6.1
   - nglview>=3.0.4
   - openmm>=8.0.0
@@ -24,4 +26,5 @@ dependencies:
     - prolif>=2.0.0
     - icn3dpy>=2.0.1
     - rcsbsearchapi>=1.7.0
+    - meeko==0.8.0
     - pdb2pqr>=3.6.1
