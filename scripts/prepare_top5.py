@@ -79,10 +79,6 @@ def rebuild_from_template(template_path, pose_path, output_sdf):
     """
     Reconstruct the ligand using the original SDF topology/charges and the
     docked PDBQT-derived coordinates.
-
-    Heavy-atom mapping is obtained from graph connectivity while ignoring bond
-    orders and charges. Hydrogen coordinates are transferred per bonded heavy
-    atom where possible.
     """
     template = Chem.MolFromMolFile(
         template_path,
@@ -114,14 +110,6 @@ def rebuild_from_template(template_path, pose_path, output_sdf):
     pose_cmp = make_graph_agnostic_mol(pose_hfree)
 
     mapping = pose_cmp.GetSubstructMatch(template_cmp)
-    if not mapping:
-        mapping = template_cmp.GetSubstructMatch(pose_cmp)
-        if mapping:
-            # Reverse the mapping so template index -> pose index.
-            reverse = [None] * len(mapping)
-            for pose_idx, template_idx in enumerate(mapping):
-                reverse[template_idx] = pose_idx
-            mapping = tuple(reverse)
 
     if not mapping:
         return False, "No graph isomorphism between template and pose"
@@ -134,15 +122,15 @@ def rebuild_from_template(template_path, pose_path, output_sdf):
             return False, "Graph mapping produced element mismatch"
 
     final_mol = Chem.Mol(template)
-    final_conf = final_mol.GetConformer() if final_mol.GetNumConformers() else None
-    if final_conf is None:
+    if final_mol.GetNumConformers():
+        final_conf = final_mol.GetConformer()
+    else:
         final_conf = Chem.Conformer(final_mol.GetNumAtoms())
         final_mol.AddConformer(final_conf, assignId=True)
 
-    template_h_to_pose_h = {}
-
     pose_conf = pose.GetConformer()
     pose_hfree_conf = pose_hfree.GetConformer()
+    template_h_to_pose_h = {}
 
     for template_heavy_idx, pose_heavy_idx in enumerate(mapping):
         pos = pose_hfree_conf.GetAtomPosition(pose_heavy_idx)
@@ -165,7 +153,6 @@ def rebuild_from_template(template_path, pose_path, output_sdf):
         for t_idx, p_idx in zip(template_h, pose_h):
             template_h_to_pose_h[t_idx] = p_idx
 
-    # Transfer hydrogen coordinates when the pose contains the same bonded Hs.
     for template_h_idx, pose_h_idx in template_h_to_pose_h.items():
         pos = pose_conf.GetAtomPosition(pose_h_idx)
         final_conf.SetAtomPosition(template_h_idx, pos)
@@ -230,6 +217,7 @@ for lid in top_5:
 
     with tempfile.NamedTemporaryFile(
         suffix=".sdf",
+        dir=OUTPUT_DIR,
         delete=False,
     ) as tmp:
         converted = tmp.name
@@ -248,14 +236,11 @@ for lid in top_5:
     ok, validation = validate_pose(lid, converted)
 
     if ok:
-        # Direct conversion is chemically valid; keep it exactly as produced.
         os.replace(converted, output)
         print(f"  OK   {lid:5s} via {method}; {validation}")
         success.append(lid)
         continue
 
-    # Fall back to the trusted template topology for poses whose inferred
-    # Open Babel bond orders/charges are not chemically valid in RDKit.
     ok, rebuild_method = rebuild_from_template(
         template, converted, output
     )
