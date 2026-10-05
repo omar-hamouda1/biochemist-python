@@ -30,10 +30,10 @@ protein_atoms = u.select_atoms("protein")
 protein_mol = plf.Molecule.from_mda(protein_atoms)
 print(f"   Protein: {len(protein_atoms)} atoms")
 
-# Enumerate the registered interaction classes directly. This avoids relying
-# on the sparse IFP/dataframe assembly path for a single docked pose and makes
-# the interaction count explicit and reproducible.
-fp = plf.Fingerprint(count=True)
+# ProLIF 2.2.x exposes the interaction metadata for a residue pair through
+# Fingerprint.metadata(). Query every ligand/protein residue pair directly so
+# valid interactions are not lost by the higher-level sparse IFP filtering.
+fp = plf.Fingerprint()
 
 print("\n2. Running ProLIF for each ligand...\n")
 
@@ -63,21 +63,18 @@ for lid in LIGANDS:
 
     for ligand_resid, ligand_residue in ligand_mol.residues.items():
         for protein_resid, protein_residue in protein_mol.residues.items():
-            if fp.ignore(ligand_residue, protein_residue):
+            metadata = fp.metadata(
+                ligand_residue,
+                protein_residue,
+            )
+
+            if not metadata:
                 continue
 
-            for interaction_name, interaction in fp.interactions.items():
-                occurrences = interaction.all(
-                    ligand_residue,
-                    protein_residue,
-                    metadata=True,
-                )
+            residues.add(protein_resid)
 
-                if not occurrences:
-                    continue
-
-                residues.add(protein_resid)
-
+            for interaction_name, occurrences in metadata.items():
+                # metadata values are tuples of occurrence dictionaries.
                 for occurrence in occurrences:
                     records.append(
                         {
