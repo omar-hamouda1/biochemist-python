@@ -23,7 +23,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def convert_pose_to_pdb(ligand_id, pdbqt_pose):
-    """Convert PDBQT to PDB without adding/removing hydrogens."""
+    """Convert PDBQT to PDB without adding hydrogens."""
     temp_pdb = os.path.join(
         tempfile.gettempdir(), f"{ligand_id}_standardized_raw.pdb"
     )
@@ -53,7 +53,7 @@ def remove_all_hydrogens(mol):
 def method_template_coordinates(temp_pdb, template_sdf, output_sdf):
     """
     Preserve bond orders/connectivity from the original ligand template and
-    transfer the docked heavy-atom coordinates from the standardized pose.
+    transfer docked heavy-atom coordinates from the standardized pose.
     """
     try:
         pose = Chem.MolFromPDBFile(
@@ -91,7 +91,6 @@ def method_template_coordinates(temp_pdb, template_sdf, output_sdf):
             conf.SetAtomPosition(idx, pose_conf.GetAtomPosition(idx))
         final_mol.AddConformer(conf, assignId=True)
 
-        # Restore hydrogens from the chemically defined template.
         final_mol = Chem.AddHs(final_mol, addCoords=True)
         Chem.SanitizeMol(final_mol)
 
@@ -112,10 +111,11 @@ def method_auto(temp_pdb, output_sdf):
         if mol is None:
             return False, "Cannot read docked PDB"
 
+        from rdkit.Chem import rdDetermineBonds
+
         for charge in [0, 1, -1, 2, -2]:
             try:
                 candidate = Chem.Mol(mol)
-                from rdkit.Chem import rdDetermineBonds
                 rdDetermineBonds.DetermineBonds(candidate, charge=charge)
                 candidate = Chem.AddHs(candidate, addCoords=True)
                 Chem.SanitizeMol(candidate)
@@ -137,7 +137,7 @@ print("Preparing standardized Top 5 for ProLIF...\n")
 
 for lid in top_5:
     pdbqt = f"{POSE_DIR}/{lid}_out.pdbqt"
-    output_sdf = f"{OUTPUT_DIR}/{lid}_fixed.sd"
+    output = f"{OUTPUT_DIR}/{lid}_fixed.sd"
 
     if not os.path.exists(pdbqt):
         print(f"  FAIL {lid}: standardized pose not found")
@@ -154,12 +154,7 @@ for lid in top_5:
 
     ok, method = method_template_coordinates(
         temp_pdb, template, output
-    ) if False else (False, "")
-
-    if not ok:
-        ok, method = method_template_coordinates(
-            temp_pdb, template, output
-        )
+    )
 
     if not ok:
         ok, method = method_auto(temp_pdb, output)
