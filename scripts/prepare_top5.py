@@ -4,7 +4,6 @@ import tempfile
 
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdDetermineBonds
 
 DOCKING_RESULTS = "docking/results/standardized_affinities.csv"
 POSE_DIR = "docking/results/standardized"
@@ -24,59 +23,114 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def convert_pose_to_pdb(ligand_id, pdbqt_pose):
-    temp_pdb = os.path.join(tempfile.gettempdir(), f"{ligand_id}_standardized_raw.pdb")
-    result = subprocess.run(["obabel", "-ipdbqt", pdbqt_pose, "-opdb", "-O", temp_pdb, "-h"], capture_output=True, text=True)
-    if result.returncode != 0:
+    """Convert PDBQT to PDB without adding/removing hydrogens."""
+    temp_pdb = os.path.join(
+        tempfile.gettempdir(), f"{ligand_id}_standardized_raw.pdb"
+    )
+    result = subprocess.run(
+        ["obabel", "-ipdbqt", pdbqt_pose, "-opdb", "-O", temp_pdb],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0 or not os.path.exists(temp_pdb):
         return None
-    return temp_pdb if os.path.exists(temp_pdb) else None
+    return temp_pdb
 
 
-def method_template(temp_pdb, template_sdf, output_sdf):
+def remove_all_hydrogens(mol):
+    """Remove every H atom by index, including malformed/isolated H atoms."""
+    editable = Chem.RWMol(mol)
+    h_indices = [
+        atom.GetIdx()
+        for atom in editable.GetAtoms()
+        if atom.GetSymbol() == "H"
+    ]
+    for idx in sorted(h_indices, reverse=True):
+        editable.RemoveAtom(idx)
+    return editable.GetMol()
+
+
+def method_template_coordinates(temp_pdb, template_sdf, output_sdf):
+    """
+    Preserve bond orders/connectivity from the original ligand template and
+    transfer the docked heavy-atom coordinates from the standardized pose.
+    """
     try:
-        pose = Chem.MolFromPDBFile(temp_pdb, removeHs=False, sanitize=False)
+        pose = Chem.MolFromPDBFile(
+            temp_pdb, removeHs=True, sanitize=False
+        )
+        template = Chem.MolFromMolFile(
+            template_sdf, removeHs=False, sanitize=False
+        )
+
         if pose is None:
-            return False, "Cannot read PDB"
-        pose_noH = Chem.RemoveHs(pose, sanitize=False)
-        template = Chem.MolFromMolFile(template_sdf, removeHs=False)
+            return False, "Cannot read docked PDB"
         if template is None:
             return False, "Cannot read template"
-        template_noH = Chem.RemoveHs(template)
-        remaining_h = [a.GetIdx() for a in template_noH.GetAtoms() if a.GetSymbol() == "H"]
-        if remaining_h:
-            editable = Chem.RWMol(template_noH)
-            for idx in sorted(remaining_h, reverse=True):
-                editable.RemoveAtom(idx)
-            template_noH = editable.GetMol()
-        if pose_noH.GetNumAtoms() != template_noH.GetNumAtoms():
-            return False, "Atom mismatch"
-        final_mol = AllChem.AssignBondOrdersFromTemplate(template_noH, pose_noH)
-        final_mol = Chem.AddHs(final_mol)
+
+        template_noH = remove_all_hydrogens(template)
+
+        if pose.GetNumAtoms() != template_noH.GetNumAtoms():
+            return (
+                False,
+                f"Heavy-atom mismatch ({pose.GetNumAtoms()} vs "
+                f"{template_noH.GetNumAtoms()})",
+            )
+
+        pose_symbols = [a.GetSymbol() for a in pose.GetAtoms()]
+        template_symbols = [a.GetSymbol() for a in template_noH.GetAtoms()]
+        if pose_symbols != template_symbols:
+            return False, "Heavy-atom order/type mismatch"
+
+        pose_conf = pose.GetConformer()
+        final_mol = Chem.Mol(template_noH)
+        final_mol.RemoveAllConformers()
+
+        conf = Chem.Conformer(template_noH.GetNumAtoms())
+        for idx in range(template_noH.GetNumAtoms()):
+            conf.SetAtomPosition(idx, pose_conf.GetAtomPosition(idx))
+        final_mol.AddConformer(conf, assignId=True)
+
+        # Restore hydrogens from the chemically defined template.
+        final_mol = Chem.AddHs(final_mol, addCoords=True)
         Chem.SanitizeMol(final_mol)
+
         writer = Chem.SDWriter(output_sdf)
         writer.write(final_mol)
         writer.close()
-        return True, "template"
+        return True, "template + docked coordinates"
     except Exception as exc:
-        return False, str(exc)[:80]
+        return False, f"template-coordinate error: {exc}"
 
 
 def method_auto(temp_pdb, output_sdf):
-    for charge in [0, 1, -1, 2, -2]:
-        try:
-            mol = Chem.MolFromPDBFile(temp_pdb, removeHs=False, sanitize=False)
-            if mol is None:
+    """Last-resort bond inference from the docked pose."""
+    try:
+        mol = Chem.MolFromPDBFile(
+            temp_pdb, removeHs=True, sanitize=False
+        )
+        if mol is None:
+            return False, "Cannot read docked PDB"
+
+        for charge in [0, 1, -1, 2, -2]:
+            try:
+                candidate = Chem.Mol(mol)
+                from rdkit.Chem import rdDetermineBonds
+                rdDetermineBonds.DetermineBonds(candidate, charge=charge)
+                candidate = Chem.AddHs(candidate, addCoords=True)
+                Chem.SanitizeMol(candidate)
+
+                writer = Chem.SDWriter(output_sdf)
+                writer.write(candidate)
+                writer.close()
+                return True, f"auto (q={charge})"
+            except Exception:
                 continue
-            mol_noH = Chem.RemoveHs(mol)
-            rdDetermineBonds.DetermineBonds(mol_noH, charge=charge)
-            mol_final = Chem.AddHs(mol_noH)
-            Chem.SanitizeMol(mol_final)
-            writer = Chem.SDWriter(output_sdf)
-            writer.write(mol_final)
-            writer.close()
-            return True, f"auto (q={charge})"
-        except Exception:
-            continue
-    return False, "all charges failed"
+
+        return False, "all charges failed"
+    except Exception as exc:
+        return False, f"auto error: {exc}"
+
 
 success, failed = [], []
 print("Preparing standardized Top 5 for ProLIF...\n")
@@ -84,19 +138,32 @@ print("Preparing standardized Top 5 for ProLIF...\n")
 for lid in top_5:
     pdbqt = f"{POSE_DIR}/{lid}_out.pdbqt"
     output_sdf = f"{OUTPUT_DIR}/{lid}_fixed.sd"
+
     if not os.path.exists(pdbqt):
         print(f"  FAIL {lid}: standardized pose not found")
         failed.append(lid)
         continue
+
     temp_pdb = convert_pose_to_pdb(lid, pdbqt)
     if temp_pdb is None:
         print(f"  FAIL {lid}: Open Babel conversion failed")
         failed.append(lid)
         continue
+
     template = "pdb/ligand.sd" if lid == "13U" else f"ligands/{lid}.sdf"
-    ok, method = method_template(temp_pdb, template, output_sdf)
+
+    ok, method = method_template_coordinates(
+        temp_pdb, template, output
+    ) if False else (False, "")
+
     if not ok:
-        ok, method = method_auto(temp_pdb, output_sdf)
+        ok, method = method_template_coordinates(
+            temp_pdb, template, output
+        )
+
+    if not ok:
+        ok, method = method_auto(temp_pdb, output)
+
     if ok:
         print(f"  OK   {lid:5s} via {method}")
         success.append(lid)
@@ -108,5 +175,6 @@ print(f"\n{'=' * 60}")
 print(f"  Success: {len(success)}/{len(top_5)}")
 print(f"  Failed:  {len(failed)}/{len(top_5)}")
 print(f"{'=' * 60}")
+
 if failed:
     print(f"\nFailed ligands: {failed}")
