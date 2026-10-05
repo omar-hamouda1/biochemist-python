@@ -7,7 +7,7 @@ implemented in this project. Each stage maps to one or more Jupyter notebooks.
 
 ## Pipeline Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    COMPUTATIONAL DRUG DISCOVERY                     │
 │                        Target: Trypsin (2ZQ2)                       │
@@ -38,116 +38,141 @@ Stage 6: Analysis            Stage 5: ADMET             Stage 4: Docking
 ## Stage 1: Python Foundations (Notebooks 01–08)
 
 ### What You Learn
-- Python syntax, variables, loops, functions, conditionals
-- File I/O: reading CSV and PDB files
-- Processing multiple files with `glob` and `os`
-- Data manipulation with `pandas`
-- Linear regression (Bradford protein assay)
-- Plotting with `matplotlib` and `seaborn`
-- Nonlinear regression (Michaelis-Menten enzyme kinetics)
+
+* Python syntax, variables, loops, functions, conditionals
+* File I/O: reading CSV and PDB files
+* Processing multiple files with `glob` and `os`
+* Data manipulation with `pandas`
+* Linear regression (Bradford protein assay)
+* Plotting with `matplotlib` and `seaborn`
+* Nonlinear regression (Michaelis-Menten enzyme kinetics)
 
 ### Key Concepts
-| Notebook | Biochemistry Concept | Python Concept |
-|----------|---------------------|----------------|
-| 01 | — | Variables, types, loops |
-| 02 | PDB file format | String parsing, file I/O |
-| 03 | Batch analysis | `glob`, `os.path` |
-| 04 | Data tables | `pandas` DataFrames |
-| 05 | Bradford assay | `scipy.stats.linregress` |
-| 06 | Assay visualization | `matplotlib`, `seaborn` |
-| 07 | Michaelis-Menten | `scipy.optimize.curve_fit` |
-| 08 | Inhibition kinetics | Nonlinear regression |
+
+| Notebook | Biochemistry Concept | Python Concept             |
+| -------- | -------------------- | -------------------------- |
+| 01       | —                    | Variables, types, loops    |
+| 02       | PDB file format      | String parsing, file I/O   |
+| 03       | Batch analysis       | `glob`, `os.path`          |
+| 04       | Data tables          | `pandas` DataFrames        |
+| 05       | Bradford assay       | `scipy.stats.linregress`   |
+| 06       | Assay visualization  | `matplotlib`, `seaborn`    |
+| 07       | Michaelis-Menten     | `scipy.optimize.curve_fit` |
+| 08       | Inhibition kinetics  | Nonlinear regression       |
 
 ---
 
 ## Stage 2: Structural Bioinformatics (Notebooks 09–11)
 
 ### What You Learn
-- Parsing mmCIF files with Biopython
-- Querying the RCSB PDB via REST API
-- 3D structure visualization with ICN3D and py3Dmol
-- Understanding resolution, R-factor, and structure quality
+
+* Parsing mmCIF files with Biopython
+* Querying the RCSB PDB via REST API
+* 3D structure visualization with ICN3D and py3Dmol
+* Understanding resolution, R-factor, and structure quality
 
 ### Key Data
-- **Myoglobin structures**: 40+ CIF files in `pdb_files/`
-- **Target protein**: Trypsin (2ZQ2) — 1.7 Å resolution
+
+* **Myoglobin structures**: 40+ CIF files in `pdb_files/`
+* **Target protein**: Trypsin (2ZQ2) — 1.7 Å resolution
 
 ---
 
 ## Stage 3: Drug Discovery (Notebooks 12–13)
 
 ### What You Learn
-- Searching PDB by EC classification (EC 3.4.21 → Serine Proteases)
-- Extracting bound ligands from crystal structures
-- Building a screening library (117 unique ligands)
-- Binding site identification and visualization
-- Understanding protein-ligand interactions
+
+* Searching PDB by EC classification (EC 3.4.21 → Serine Proteases)
+* Extracting bound ligands from crystal structures
+* Building a screening library (117 unique ligands)
+* Binding site identification and visualization
+* Understanding protein-ligand interactions
 
 ### Output
-- `ligands/` directory: 117 SDF files
-- Binding site residue list
-- Reference ligand (13U) interaction profile
+
+* `ligands/` directory: 117 SDF files
+* Standardized screening set: 111 validated ligands
+* Binding site residue list
+* Reference ligand (13U) interaction profile
 
 ---
 
 ## Stage 4: Virtual Screening (Notebook 14)
 
 ### What You Learn
-- Receptor preparation (PDB → PDBQT)
-- Ligand preparation (SDF → PDBQT)
-- Docking box definition (centered on binding site)
-- Running AutoDock Vina / Smina
-- Parsing and ranking results
+
+* Receptor preparation (PDB → PDBQT)
+* Ligand preparation (SDF → PDBQT)
+* Docking box definition (centered on binding site)
+* Running AutoDock Vina / Smina
+* Parsing and ranking results
 
 ### Configuration
-```
+
+```text
 Box center: (17.672, -8.256, 10.688) Å
 Box size: 25.0 × 25.0 × 25.0 Å
-Exhaustiveness: 8
+Exhaustiveness: 4
+Number of modes: 1
+Random seed: 42
 ```
 
-### Top 5 Results
+The standardized screening run used Smina with the fixed configuration above
+for the validated 111-ligand set. The resulting report is stored in
+`docking/results/standardized_affinities.csv`.
+
+### Current Top 5 Results
+
 | Rank | Ligand | Affinity (kcal/mol) |
-|------|--------|---------------------|
-| 1 | 13U | -9.52 |
-| 2 | R11 | -9.51 |
-| 3 | BAH | -9.40 |
-| 4 | 607 | -9.40 |
-| 5 | 12U | -9.35 |
+| ---- | ------ | ------------------- |
+| 1    | R11    | -9.787609           |
+| 2    | 13U    | -9.511141           |
+| 3    | BAH    | -9.413809           |
+| 4    | 12U    | -9.374041           |
+| 5    | T87    | -9.270527           |
 
 ---
 
 ## Stage 5: ADMET Prediction (Notebook 15)
 
 ### What You Learn
-- Lipinski's Rule of Five
-- Molecular descriptors (MW, LogP, HBD, HBA)
-- Drug-likeness assessment
-- Filtering hits by ADMET properties
+
+* Lipinski's Rule of Five
+* Molecular descriptors (MW, LogP, HBD, HBA)
+* Drug-likeness assessment
+* Filtering hits by ADMET properties
+* RDKit descriptor-based and rule-based screening
+  (not full ADME/toxicity prediction)
 
 ---
 
 ## Stage 6: Molecular Dynamics (Notebook 16)
 
 ### What You Learn
-- System preparation (protein + ligand + solvent + ions)
-- Energy minimization
-- NVT and NPT equilibration
-- Production MD run
-- Trajectory analysis (RMSD, RMSF, hydrogen bonds)
-- MMPBSA binding free energy decomposition
-- ProLIF interaction fingerprint heatmaps
+
+* System preparation (protein + ligand + solvent + ions)
+* Energy minimization
+* NVT and NPT equilibration
+* Production MD run
+* Trajectory analysis (RMSD, RMSF, hydrogen bonds)
+* MMPBSA binding free energy decomposition
+* ProLIF interaction fingerprint heatmaps
+
+The MD analysis currently documented in this repository is based on the
+historical 13U–Trypsin reference-ligand system. It is not a claim that the
+current docking top hit R11 has been experimentally or MD validated.
 
 ### Software
-- **OpenMM** for simulation
-- **MDAnalysis** for trajectory analysis
-- **ProLIF** for interaction fingerprints
+
+* **OpenMM** for simulation
+* **MDAnalysis** for trajectory analysis
+* **ProLIF** for interaction fingerprints
 
 ---
 
 ## Directory Map
 
-```
+```text
 biochemist-python_ORGANIZED/
 ├── notebooks/          # 16 Jupyter notebooks (main pipeline)
 ├── src/                # Reusable Python modules

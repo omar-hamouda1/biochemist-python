@@ -22,7 +22,8 @@ This project implements a **complete computational drug discovery pipeline** des
 | 🎯 **Protein Target** | Trypsin — Serine Protease (EC 3.4.21.4) — PDB: [`2ZQ2`](https://www.rcsb.org/structure/2ZQ2) |
 | 💊 **Reference Ligand** | `13U` (co-crystallized inhibitor) |
 | 📚 **Screening Library** | 117 ligands from PDB (EC class 3.4.21) |
-| 🏆 **Top Hit** | `13U` at **-9.52 kcal/mol** (confirmed by MD simulation) |
+| 🧪 **Standardized Docking Set** | 111 validated ligands |
+| 🏆 **Current Top Hit** | `R11` at **-9.79 kcal/mol** in the standardized docking run |
 
 ---
 
@@ -94,17 +95,26 @@ jupyter lab
 
 ## 🏆 Key Results
 
-### Top 5 Virtual Screening Hits
+### Top 5 Standardized Virtual Screening Hits
 
-| Rank | Ligand | Affinity (kcal/mol) | Passes Ro5 |
-|------|--------|---------------------|------------|
-| 1 | **13U** | **-9.52** | ✅ |
-| 2 | R11 | -9.51 | ✅ |
-| 3 | BAH | -9.40 | ✅ |
-| 4 | 607 | -9.40 | ✅ |
-| 5 | 12U | -9.35 | ✅ |
+| Rank | Ligand | Affinity (kcal/mol) | Lipinski | Veber | PAINS |
+|------|--------|---------------------|----------|--------|-------|
+| 1 | **R11** | **-9.79** | Excellent | Pass | Clean |
+| 2 | **13U** | **-9.51** | Excellent | Pass | Clean |
+| 3 | **BAH** | **-9.41** | Acceptable | Fail | Clean |
+| 4 | **12U** | **-9.37** | Excellent | Pass | Clean |
+| 5 | **T87** | **-9.27** | Excellent | Fail | Clean |
+
+> **Interpretation:** These are standardized docking scores followed by
+> RDKit descriptor/rule-based filtering and ProLIF interaction analysis.
+> They are not experimental activity measurements or full ADME/toxicity
+> predictions.
 
 ### MD Simulation Highlights
+
+The MD results below describe the historical **13U–Trypsin reference-ligand
+system**. They should not be interpreted as MD validation of the current
+standardized docking top hit R11.
 
 **System:** 13U–Trypsin complex in explicit TIP3P water + 0.15 M NaCl (24,590 atoms, 64.2 Å box).
 
