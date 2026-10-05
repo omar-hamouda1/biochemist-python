@@ -1,6 +1,6 @@
-ligand_id,affinity,n_interactions,n_residues
-13U,-9.52222729,7,7
-R11,-9.50679398,10,10
-BAH,-9.40473652,16,14
-607,-9.39640045,21,17
-12U,-9.34662437,12,12
+ligand_id,affinity,n_interactions,n_residues,interaction_types
+R11,-9.7876091,14,9,VdWContact:8; Hydrophobic:3; HBDonor:2; HBAcceptor:1
+13U,-9.51114082,11,8,VdWContact:8; HBDonor:3
+BAH,-9.41380882,23,20,VdWContact:19; Cationic:2; Hydrophobic:1; HBDonor:1
+12U,-9.3740406,11,9,VdWContact:9; HBDonor:2
+T87,-9.27052689,15,11,VdWContact:8; Hydrophobic:3; HBDonor:2; PiStacking:1; PiCation:1

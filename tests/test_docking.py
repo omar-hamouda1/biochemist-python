@@ -5,7 +5,7 @@ from pathlib import Path
 from src.docking import parse_vina_output, get_top_hits, read_box_config
 
 
-AFFINITIES_CSV = Path("docking/results/affinities_full.csv")
+AFFINITIES_CSV = Path("docking/results/standardized_affinities.csv")
 BOX_CONFIG = Path("docking/box_config.txt")
 
 
@@ -46,9 +46,15 @@ class TestGetTopHits:
         affinities = df["affinity"].tolist()
         assert affinities == sorted(affinities)
 
-    def test_top_hit_is_13u(self):
-        df = get_top_hits(str(AFFINITIES_CSV), n=1)
-        assert df.iloc[0]["ligand_id"] == "13U"
+    def test_standardized_top_five(self):
+        df = get_top_hits(str(AFFINITIES_CSV), n=5)
+        assert df["ligand_id"].tolist() == [
+            "R11",
+            "13U",
+            "BAH",
+            "12U",
+            "T87",
+        ]
 
 
 @pytest.mark.skipif(not BOX_CONFIG.exists(), reason="Box config not available")
