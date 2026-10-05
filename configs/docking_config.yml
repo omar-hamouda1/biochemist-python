@@ -1,6 +1,6 @@
-# ─── Docking Configuration ──────────────────────────────────────────────
+# Standardized docking protocol
 # Target: Trypsin (PDB: 2ZQ2)
-# Reference Ligand: 13U (co-crystallized inhibitor)
+# Reference ligand: 13U (co-crystallized inhibitor)
 
 # Docking box (derived from reference ligand position)
 center_x: 17.672
@@ -10,12 +10,11 @@ size_x: 25.0
 size_y: 25.0
 size_z: 25.0
 
-# Vina parameters
-exhaustiveness: 8
-num_modes: 9
-energy_range: 3
-
-# Input/Output
-receptor: docking/receptor/protein_h.pdbqt
+# Smina parameters
+exhaustiveness: 4
+num_modes: 1
+seed: 42
+# Input / output
+receptor: docking/receptor/2zq2_receptor.pdbqt
 ligand_dir: docking/ligands/
-output_dir: docking/results/
+output_dir: docking/results/standardized/

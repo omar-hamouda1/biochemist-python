@@ -7,7 +7,7 @@ import subprocess
 RECEPTOR = Path("docking/receptor/2zq2_receptor.pdbqt")
 LIGAND_DIR = Path("docking/ligands")
 RESULTS_DIR = Path("docking/results/standardized")
-MANIFEST = Path("docking/results/affinities_recovered_111.csv")
+MANIFEST = Path("docking/results/validated_ligands_111.csv")
 REPORT = Path("docking/results/standardized_affinities.csv")
 
 CENTER = (17.672, -8.256, 10.688)
