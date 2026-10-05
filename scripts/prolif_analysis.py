@@ -30,9 +30,6 @@ protein_atoms = u.select_atoms("protein")
 protein_mol = plf.Molecule.from_mda(protein_atoms)
 print(f"   Protein: {len(protein_atoms)} atoms")
 
-# ProLIF 2.2.x exposes the interaction metadata for a residue pair through
-# Fingerprint.metadata(). Query every ligand/protein residue pair directly so
-# valid interactions are not lost by the higher-level sparse IFP filtering.
 fp = plf.Fingerprint()
 
 print("\n2. Running ProLIF for each ligand...\n")
@@ -61,8 +58,18 @@ for lid in LIGANDS:
     records = []
     residues = set()
 
-    for ligand_resid, ligand_residue in ligand_mol.residues.items():
-        for protein_resid, protein_residue in protein_mol.residues.items():
+    # Use the documented Molecule/ResidueGroup indexing API instead of
+    # consuming residue objects returned by .items(). ProLIF documents residue
+    # access by ResidueId/string/index through Molecule.__getitem__.
+    ligand_ids = list(ligand_mol.residues.keys())
+    protein_ids = list(protein_mol.residues.keys())
+
+    for ligand_resid in ligand_ids:
+        ligand_residue = ligand_mol[ligand_resid]
+
+        for protein_resid in protein_ids:
+            protein_residue = protein_mol[protein_resid]
+
             metadata = fp.metadata(
                 ligand_residue,
                 protein_residue,
@@ -74,7 +81,6 @@ for lid in LIGANDS:
             residues.add(protein_resid)
 
             for interaction_name, occurrences in metadata.items():
-                # metadata values are tuples of occurrence dictionaries.
                 for occurrence in occurrences:
                     records.append(
                         {
