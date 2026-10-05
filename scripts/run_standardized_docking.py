@@ -1,14 +1,8 @@
-"""run_standardized_docking.py — Re-dock the validated ligand set under one fixed protocol.
-
-This is the final homogeneous docking run used for scientific ranking.
-The 111-ligand manifest comes from the recovered/validated dataset; the six
-documented exceptions remain excluded from docking.
-"""
+"""Resumable standardized docking for the validated 111-ligand set."""
 
 from pathlib import Path
 import csv
 import subprocess
-
 
 RECEPTOR = Path("docking/receptor/2zq2_receptor.pdbqt")
 LIGAND_DIR = Path("docking/ligands")
@@ -24,12 +18,10 @@ SEED = 42
 TIMEOUT_SEC = 300
 
 
-def parse_affinity(output_file: Path):
-    """Read the best smina affinity from minimizedAffinity."""
-    if not output_file.exists():
+def parse_affinity(path: Path):
+    if not path.exists():
         return None
-
-    with output_file.open() as handle:
+    with path.open() as handle:
         for line in handle:
             if line.startswith("REMARK minimizedAffinity"):
                 try:
@@ -40,67 +32,44 @@ def parse_affinity(output_file: Path):
 
 
 def load_ligands():
-    """Load the 111-ligand validation manifest."""
-    if not MANIFEST.exists():
-        raise FileNotFoundError(f"Missing manifest: {MANIFEST}")
-
     with MANIFEST.open(newline="") as handle:
-        reader = csv.DictReader(handle)
-        ligand_ids = [row["ligand_id"] for row in reader if row.get("ligand_id")]
-
+        rows = list(csv.DictReader(handle))
+    ligand_ids = [row["ligand_id"] for row in rows if row.get("ligand_id")]
     if len(ligand_ids) != 111:
-        raise ValueError(
-            f"Expected 111 validated ligands, found {len(ligand_ids)}"
-        )
-
-    if len(set(ligand_ids)) != len(ligand_ids):
+        raise ValueError(f"Expected 111 validated ligands, found {len(ligand_ids)}")
+    if len(set(ligand_ids)) != 111:
         raise ValueError("Validated ligand manifest contains duplicate IDs")
-
     return ligand_ids
 
 
 def run_one(ligand_id: str):
-    """Run one standardized smina docking job."""
     ligand = LIGAND_DIR / f"{ligand_id}.pdbqt"
     output = RESULTS_DIR / f"{ligand_id}_out.pdbqt"
 
     if not ligand.exists():
-        return {
-            "ligand_id": ligand_id,
-            "affinity": None,
-            "status": "ligand_missing",
-            "message": str(ligand),
-        }
+        return ligand_id, None, "ligand_missing", str(ligand)
+
+    existing = parse_affinity(output)
+    if existing is not None:
+        return ligand_id, existing, "existing", ""
 
     if output.exists():
         output.unlink()
 
     command = [
         "smina",
-        "--receptor",
-        str(RECEPTOR),
-        "--ligand",
-        str(ligand),
-        "--center_x",
-        str(CENTER[0]),
-        "--center_y",
-        str(CENTER[1]),
-        "--center_z",
-        str(CENTER[2]),
-        "--size_x",
-        str(BOX_SIZE),
-        "--size_y",
-        str(BOX_SIZE),
-        "--size_z",
-        str(BOX_SIZE),
-        "--exhaustiveness",
-        str(EXHAUSTIVENESS),
-        "--num_modes",
-        str(NUM_MODES),
-        "--seed",
-        str(SEED),
-        "--out",
-        str(output),
+        "--receptor", str(RECEPTOR),
+        "--ligand", str(ligand),
+        "--center_x", str(CENTER[0]),
+        "--center_y", str(CENTER[1]),
+        "--center_z", str(CENTER[2]),
+        "--size_x", str(BOX_SIZE),
+        "--size_y", str(BOX_SIZE),
+        "--size_z", str(BOX_SIZE),
+        "--exhaustiveness", str(EXHAUSTIVENESS),
+        "--num_modes", str(NUM_MODES),
+        "--seed", str(SEED),
+        "--out", str(output),
     ]
 
     try:
@@ -112,30 +81,14 @@ def run_one(ligand_id: str):
             check=False,
         )
     except subprocess.TimeoutExpired:
-        return {
-            "ligand_id": ligand_id,
-            "affinity": None,
-            "status": "timeout",
-            "message": f">{TIMEOUT_SEC}s",
-        }
+        return ligand_id, None, "timeout", f">{TIMEOUT_SEC}s"
 
     affinity = parse_affinity(output)
-
     if affinity is not None:
-        return {
-            "ligand_id": ligand_id,
-            "affinity": affinity,
-            "status": "ok",
-            "message": "",
-        }
+        return ligand_id, affinity, "ok", ""
 
     message = (result.stderr or result.stdout).replace("\n", " ").strip()
-    return {
-        "ligand_id": ligand_id,
-        "affinity": None,
-        "status": "failed",
-        "message": message[:300],
-    }
+    return ligand_id, None, "failed", message[:300]
 
 
 def main():
@@ -144,25 +97,24 @@ def main():
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     ligand_ids = load_ligands()
+    rows = []
 
     print("=" * 80)
-    print("STANDARDIZED DOCKING — 111 VALIDATED LIGANDS")
+    print("STANDARDIZED DOCKING — RESUMABLE 111-LIGAND RUN")
     print("=" * 80)
-    print(f"Seed: {SEED}")
-    print(f"Exhaustiveness: {EXHAUSTIVENESS}")
-    print(f"Num modes: {NUM_MODES}")
-    print(f"Box: center={CENTER}, size={BOX_SIZE} Å")
-    print(f"Ligands: {len(ligand_ids)}")
-    print()
 
-    results = []
     for index, ligand_id in enumerate(ligand_ids, start=1):
-        row = run_one(ligand_id)
-        results.append(row)
+        lid, affinity, status, message = run_one(ligand_id)
+        rows.append({
+            "ligand_id": lid,
+            "affinity": affinity,
+            "status": status,
+            "message": message,
+        })
         print(
-            f"[{index:3d}/{len(ligand_ids)}] "
-            f"{ligand_id:>5} | {row['status']:<14} | "
-            f"affinity={row['affinity']}"
+            f"[{index:3d}/{len(ligand_ids)}] {lid:>5} | "
+            f"{status:<14} | affinity={affinity}",
+            flush=True,
         )
 
     with REPORT.open("w", newline="") as handle:
@@ -171,23 +123,21 @@ def main():
             fieldnames=["ligand_id", "affinity", "status", "message"],
         )
         writer.writeheader()
-        writer.writerows(results)
+        writer.writerows(rows)
 
-    successful = [r for r in results if r["status"] == "ok"]
-    failed = [r for r in results if r["status"] != "ok"]
+    completed = [r for r in rows if r["status"] in {"ok", "existing"}]
+    newly = [r for r in rows if r["status"] == "ok"]
+    reused = [r for r in rows if r["status"] == "existing"]
+    failed = [r for r in rows if r["status"] not in {"ok", "existing"}]
 
-    print()
     print("=" * 80)
-    print(f"Successful standardized dockings: {len(successful)}/{len(results)}")
+    print(f"Completed standardized dockings: {len(completed)}/{len(rows)}")
+    print(f"Newly docked this run: {len(newly)}")
+    print(f"Reused existing valid outputs: {len(reused)}")
     print(f"Failed/timeout: {len(failed)}")
     print(f"Report: {REPORT}")
     print(f"Pose directory: {RESULTS_DIR}")
     print("=" * 80)
-
-    if failed:
-        print("\nFailed ligands:")
-        for row in failed:
-            print(f"  {row['ligand_id']}: {row['status']} — {row['message']}")
 
 
 if __name__ == "__main__":
