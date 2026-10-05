@@ -32,6 +32,13 @@ print(f"   Protein: {len(protein_atoms)} atoms")
 
 fp = plf.Fingerprint()
 
+# ProLIF 2.2.x has a subtle residue-access behavior in the current
+# MDAnalysis/RDKit conversion path: direct string/index lookup returns the
+# residue object used correctly by interaction detection, while consuming
+# residue objects directly from ResidueGroup.items() can yield empty metadata.
+# Use stable string identifiers and Molecule[...] for both sides.
+protein_ids = [str(resid) for resid in protein_mol.residues.keys()]
+
 print("\n2. Running ProLIF for each ligand...\n")
 
 all_results = {}
@@ -55,41 +62,40 @@ for lid in LIGANDS:
         continue
 
     ligand_mol = plf.Molecule.from_rdkit(ligand_rdkit)
+
+    if ligand_mol.n_residues != 1:
+        raise RuntimeError(
+            f"{lid} contains {ligand_mol.n_residues} ligand residues; "
+            "expected exactly one."
+        )
+
+    ligand_residue = ligand_mol[0]
     records = []
     residues = set()
 
-    # Use the documented Molecule/ResidueGroup indexing API instead of
-    # consuming residue objects returned by .items(). ProLIF documents residue
-    # access by ResidueId/string/index through Molecule.__getitem__.
-    ligand_ids = list(ligand_mol.residues.keys())
-    protein_ids = list(protein_mol.residues.keys())
+    for protein_id in protein_ids:
+        protein_residue = protein_mol[protein_id]
 
-    for ligand_resid in ligand_ids:
-        ligand_residue = ligand_mol[ligand_resid]
+        metadata = fp.metadata(
+            ligand_residue,
+            protein_residue,
+        )
 
-        for protein_resid in protein_ids:
-            protein_residue = protein_mol[protein_resid]
+        if not metadata:
+            continue
 
-            metadata = fp.metadata(
-                ligand_residue,
-                protein_residue,
-            )
+        residues.add(protein_id)
 
-            if not metadata:
-                continue
-
-            residues.add(protein_resid)
-
-            for interaction_name, occurrences in metadata.items():
-                for occurrence in occurrences:
-                    records.append(
-                        {
-                            "ligand_residue": ligand_resid,
-                            "protein_residue": protein_resid,
-                            "interaction": interaction_name,
-                            "metadata": occurrence,
-                        }
-                    )
+        for interaction_name, occurrences in metadata.items():
+            for occurrence in occurrences:
+                records.append(
+                    {
+                        "ligand_residue": str(ligand_residue.resid),
+                        "protein_residue": protein_id,
+                        "interaction": interaction_name,
+                        "metadata": occurrence,
+                    }
+                )
 
     all_results[lid] = records
     ligand_residues[lid] = residues
@@ -123,7 +129,7 @@ for lid in LIGANDS:
     )
 
     print(f"   Protein Residues ({len(residues)}):")
-    for residue in sorted(str(r) for r in residues):
+    for residue in sorted(residues):
         print(f"      - {residue}")
 
     print("   Interaction Types:")
@@ -134,7 +140,7 @@ for lid in LIGANDS:
         print("      None")
 
 common = set.intersection(
-    *(set(map(str, residues)) for residues in ligand_residues.values())
+    *(set(residues) for residues in ligand_residues.values())
 ) if ligand_residues else set()
 
 print(
@@ -151,8 +157,7 @@ for residue in sorted(common):
 
 print("\n★ Residues per ligand:")
 for lid in LIGANDS:
-    residues = ligand_residues.get(lid, set())
-    print(f"   {lid}: {sorted(map(str, residues))}")
+    print(f"   {lid}: {sorted(ligand_residues.get(lid, set()))}")
 
 summary_data = []
 
