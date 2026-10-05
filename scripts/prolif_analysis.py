@@ -30,10 +30,10 @@ protein_atoms = u.select_atoms("protein")
 protein_mol = plf.Molecule.from_mda(protein_atoms)
 print(f"   Protein: {len(protein_atoms)} atoms")
 
-# Use the same interaction classes as ProLIF's default fingerprint, but query
-# metadata directly for each ligand/protein residue pair. This avoids relying
-# on the iterable fingerprint assembly path for single docked poses.
-fp = plf.Fingerprint()
+# Enumerate the registered interaction classes directly. This avoids relying
+# on the sparse IFP/dataframe assembly path for a single docked pose and makes
+# the interaction count explicit and reproducible.
+fp = plf.Fingerprint(count=True)
 
 print("\n2. Running ProLIF for each ligand...\n")
 
@@ -60,23 +60,25 @@ for lid in LIGANDS:
     ligand_mol = plf.Molecule.from_rdkit(ligand_rdkit)
     records = []
     residues = set()
-    interaction_types = Counter()
 
     for ligand_resid, ligand_residue in ligand_mol.residues.items():
         for protein_resid, protein_residue in protein_mol.residues.items():
             if fp.ignore(ligand_residue, protein_residue):
                 continue
 
-            metadata = fp.metadata(ligand_residue, protein_residue)
+            for interaction_name, interaction in fp.interactions.items():
+                occurrences = interaction.all(
+                    ligand_residue,
+                    protein_residue,
+                    metadata=True,
+                )
 
-            if not metadata:
-                continue
+                if not occurrences:
+                    continue
 
-            residues.add(protein_resid)
+                residues.add(protein_resid)
 
-            for interaction_name, occurrences in metadata.items():
                 for occurrence in occurrences:
-                    interaction_types[interaction_name] += 1
                     records.append(
                         {
                             "ligand_residue": ligand_resid,
@@ -88,6 +90,10 @@ for lid in LIGANDS:
 
     all_results[lid] = records
     ligand_residues[lid] = residues
+
+    interaction_types = Counter(
+        record["interaction"] for record in records
+    )
 
     print(
         f"   {lid:5s}: {len(records)} interactions, "
