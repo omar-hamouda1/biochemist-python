@@ -2,7 +2,8 @@ import os
 
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import Descriptors, FilterCatalog, FilterCatalogParams, Lipinski, rdMolDescriptors
+from rdkit.Chem import Descriptors, Lipinski, rdMolDescriptors
+from rdkit.Chem.FilterCatalog import FilterCatalog, FilterCatalogParams
 
 DOCKING_RESULTS = "docking/results/standardized_affinities.csv"
 FIXED_DIR = "docking/results/fixed"
@@ -76,7 +77,7 @@ def veber(props):
 def pains_catalog():
     params = FilterCatalogParams()
     params.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS)
-    return FilterCatalog.FilterCatalog(params)
+    return FilterCatalog(params)
 
 
 ranking = load_top_hits()
