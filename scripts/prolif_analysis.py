@@ -13,7 +13,9 @@ OUTPUT = "docking/results/prolif_summary.csv"
 
 ranking = pd.read_csv(DOCKING_RESULTS)
 ranking["affinity"] = pd.to_numeric(ranking["affinity"], errors="coerce")
-ranking = ranking[ranking["status"].isin(["ok", "existing"])].dropna(subset=["affinity"])
+ranking = ranking[
+    ranking["status"].isin(["ok", "existing"])
+].dropna(subset=["affinity"])
 ranking = ranking.sort_values("affinity").reset_index(drop=True)
 LIGANDS = ranking.head(5)["ligand_id"].tolist()
 
@@ -28,23 +30,69 @@ protein_atoms = u.select_atoms("protein")
 protein_mol = plf.Molecule.from_mda(protein_atoms)
 print(f"   Protein: {len(protein_atoms)} atoms")
 
+# Use the same interaction classes as ProLIF's default fingerprint, but query
+# metadata directly for each ligand/protein residue pair. This avoids relying
+# on the iterable fingerprint assembly path for single docked poses.
+fp = plf.Fingerprint()
+
 print("\n2. Running ProLIF for each ligand...\n")
+
 all_results = {}
+ligand_residues = {}
+
 for lid in LIGANDS:
     sdf_path = f"{FIXED_DIR}/{lid}_fixed.sd"
+
     if not os.path.exists(sdf_path):
         print(f"   SKIP {lid}: file not found")
         continue
-    ligand_rdkit = Chem.MolFromMolFile(sdf_path, removeHs=False)
+
+    ligand_rdkit = Chem.MolFromMolFile(
+        sdf_path,
+        removeHs=False,
+        sanitize=True,
+    )
+
     if ligand_rdkit is None:
         print(f"   FAIL {lid}: cannot read SDF")
         continue
+
     ligand_mol = plf.Molecule.from_rdkit(ligand_rdkit)
-    fp = plf.Fingerprint()
-    fp.run_from_iterable([ligand_mol], protein_mol)
-    df = fp.to_dataframe()
-    all_results[lid] = df
-    print(f"   {lid:5s}: {df.shape[1]} interactions")
+    records = []
+    residues = set()
+    interaction_types = Counter()
+
+    for ligand_resid, ligand_residue in ligand_mol.residues.items():
+        for protein_resid, protein_residue in protein_mol.residues.items():
+            if fp.ignore(ligand_residue, protein_residue):
+                continue
+
+            metadata = fp.metadata(ligand_residue, protein_residue)
+
+            if not metadata:
+                continue
+
+            residues.add(protein_resid)
+
+            for interaction_name, occurrences in metadata.items():
+                for occurrence in occurrences:
+                    interaction_types[interaction_name] += 1
+                    records.append(
+                        {
+                            "ligand_residue": ligand_resid,
+                            "protein_residue": protein_resid,
+                            "interaction": interaction_name,
+                            "metadata": occurrence,
+                        }
+                    )
+
+    all_results[lid] = records
+    ligand_residues[lid] = residues
+
+    print(
+        f"   {lid:5s}: {len(records)} interactions, "
+        f"{len(residues)} residues"
+    )
 
 if not all_results:
     raise RuntimeError("No ProLIF results were generated")
@@ -53,48 +101,89 @@ print(f"\n{'=' * 70}")
 print("  Detailed Interactions")
 print(f"{'=' * 70}")
 
-ligand_residues = {}
-for lid, df in all_results.items():
-    print(f"\n▶ {lid}:\n{'-' * 70}")
-    residues = set()
-    interaction_types = Counter()
-    for col in df.columns:
-        if len(col) >= 3:
-            protein_res, itype = col[1], col[2]
-        elif len(col) == 2:
-            protein_res, itype = col[1], "Interaction"
-        else:
-            continue
-        if df.iloc[0][col]:
-            residues.add(protein_res)
-            interaction_types[itype] += 1
-    ligand_residues[lid] = residues
-    print(f"   Protein Residues ({len(residues)}):")
-    for r in sorted(residues):
-        print(f"      - {r}")
-    print("   Interaction Types:")
-    for itype, count in interaction_types.most_common():
-        print(f"      {itype:20s}: {count}")
+for lid in LIGANDS:
+    if lid not in all_results:
+        continue
 
-common = set.intersection(*ligand_residues.values()) if ligand_residues else set()
-print(f"\n{'=' * 70}\n  Comparison: Common Residues Across Ligands\n{'=' * 70}")
-print(f"\n★ Common residues (found in ALL {len(ligand_residues)} ligands):")
-for r in sorted(common):
-    print(f"   ✅ {r}")
+    print(f"\n▶ {lid}:\n{'-' * 70}")
+
+    records = all_results[lid]
+    residues = ligand_residues[lid]
+    interaction_types = Counter(
+        record["interaction"] for record in records
+    )
+
+    print(f"   Protein Residues ({len(residues)}):")
+    for residue in sorted(str(r) for r in residues):
+        print(f"      - {residue}")
+
+    print("   Interaction Types:")
+    if interaction_types:
+        for itype, count in interaction_types.most_common():
+            print(f"      {itype:20s}: {count}")
+    else:
+        print("      None")
+
+common = set.intersection(
+    *(set(map(str, residues)) for residues in ligand_residues.values())
+) if ligand_residues else set()
+
+print(
+    f"\n{'=' * 70}\n"
+    "  Comparison: Common Residues Across Ligands\n"
+    f"{'=' * 70}"
+)
+
+print(
+    f"\n★ Common residues (found in ALL {len(ligand_residues)} ligands):"
+)
+for residue in sorted(common):
+    print(f"   ✅ {residue}")
+
 print("\n★ Residues per ligand:")
-for lid, residues in ligand_residues.items():
-    print(f"   {lid}: {sorted(residues)}")
+for lid in LIGANDS:
+    residues = ligand_residues.get(lid, set())
+    print(f"   {lid}: {sorted(map(str, residues))}")
 
 summary_data = []
-for lid, df in all_results.items():
-    summary_data.append({
-        "ligand_id": lid,
-        "affinity": float(ranking.loc[ranking["ligand_id"] == lid, "affinity"].iloc[0]),
-        "n_interactions": df.shape[1],
-        "n_residues": len(ligand_residues[lid]),
-    })
-summary_df = pd.DataFrame(summary_data).sort_values("affinity")
+
+for lid in LIGANDS:
+    records = all_results.get(lid, [])
+    residues = ligand_residues.get(lid, set())
+    interaction_types = Counter(
+        record["interaction"] for record in records
+    )
+
+    summary_data.append(
+        {
+            "ligand_id": lid,
+            "affinity": float(
+                ranking.loc[
+                    ranking["ligand_id"] == lid,
+                    "affinity",
+                ].iloc[0]
+            ),
+            "n_interactions": len(records),
+            "n_residues": len(residues),
+            "interaction_types": "; ".join(
+                f"{name}:{count}"
+                for name, count in interaction_types.most_common()
+            ),
+        }
+    )
+
+summary_df = (
+    pd.DataFrame(summary_data)
+    .sort_values("affinity")
+    .reset_index(drop=True)
+)
+
 summary_df.to_csv(OUTPUT, index=False)
+
 print(f"\n{summary_df.to_string(index=False)}")
 print(f"\n   ✅ Saved: {OUTPUT}")
-print(f"\n{'=' * 70}\n  🎉 Analysis Complete!\n{'=' * 70}")
+print(
+    f"\n{'=' * 70}\n"
+    "  🎉 Analysis Complete!\n"
+    f"{'=' * 70}"
+)
