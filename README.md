@@ -13,7 +13,7 @@
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?logo=jupyter)](https://jupyter.org/)
 [![RDKit](https://img.shields.io/badge/RDKit-2024-green)](https://www.rdkit.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-28%20passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-30%20passed-brightgreen)](tests/)
 [![Conda](https://img.shields.io/badge/conda-environment-green?logo=anaconda)](environment.yml)
 
 ---
@@ -50,7 +50,7 @@ The project combines **educational Jupyter notebooks** with reusable Python modu
 | **Docking engine**        | Smina                        |
 | **Docking configuration** | `configs/docking_config.yml` |
 | **Docking audit**         | `scripts/audit_docking.py`   |
-| **Automated tests**       | 28 passing                   |
+| **Automated tests**       | 30 passing                   |
 
 The standardized screening workflow is configuration-driven and uses a single authoritative docking configuration rather than duplicating docking parameters across multiple scripts.
 
@@ -119,11 +119,13 @@ conda env create -f environment.yml
 
 Activate the environment defined by your local `environment.yml`.
 
-For the development environment used during validation of this project:
+The environment created by `environment.yml` is named `biochem`:
 
 ```bash
-conda activate biochem-vscode
+conda activate biochem
 ```
+
+A local development environment may use a different name; the repository specification remains `biochem`.
 
 ### 3. Launch JupyterLab
 
@@ -403,8 +405,8 @@ The standardized docking audit also provides an independent project-level consis
 | **Programming**          | Python 3.11                                  |
 | **Data Analysis**        | NumPy, Pandas, SciPy                         |
 | **Structure Analysis**   | Biopython, MDAnalysis                        |
-| **Cheminformatics**      | RDKit, rcsbsearchapi                         |
-| **Docking**              | Smina, AutoDock Vina, Open Babel             |
+| **Cheminformatics**      | RDKit, rcsb-api                         |
+| **Docking**              | Smina, Open Babel             |
 | **Interaction Analysis** | ProLIF                                       |
 | **Visualization**        | py3Dmol, NGLView, iCN3D, Matplotlib, Seaborn |
 | **Molecular Dynamics**   | OpenMM                                       |
