@@ -440,11 +440,16 @@ biochemist-python/
 │   ├── admet.py                  # ADMET / Lipinski calculations
 │   ├── docking.py                # Docking result parsing/utilities
 │   ├── docking_config.py         # Validated docking configuration model
+│   ├── provenance.py             # Artifact provenance and integrity helpers
 │   └── visualization.py          # 3D visualization helpers
 │
 ├── scripts/                      # Standalone workflow scripts
 │   ├── audit_docking.py          # Standardized docking audit
-│   └── run_standardized_docking.py
+│   ├── run_standardized_docking.py
+│   ├── prepare_ligands.py        # Provenance-aware ligand preparation
+│   ├── prepare_receptor.py       # Deterministic receptor PDBQT preparation
+│   ├── build_provenance_manifest.py
+│   └── capture_environment.py    # Exact validation-environment snapshot
 │
 ├── tests/                        # Automated tests
 │
