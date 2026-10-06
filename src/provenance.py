@@ -1,4 +1,4 @@
-"""Provenance helpers for reproducible structure-preparation and docking steps."""
+"""Provenance helpers for reproducible structure preparation and docking."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def sha256_file(path: Path) -> str:
@@ -22,14 +22,19 @@ def sha256_file(path: Path) -> str:
 
 
 def executable_version(executable: str) -> str:
-    """Return normalized executable version text."""
-    result = subprocess.run(
-        [executable, "--version"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    return " ".join((result.stdout or result.stderr).strip().split())
+    """Return normalized executable version text, or unavailable."""
+    try:
+        result = subprocess.run(
+            [executable, "--version"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (FileNotFoundError, OSError):
+        return "unavailable"
+
+    output = (result.stdout or result.stderr or "").strip()
+    return " ".join(output.split()) or "unavailable"
 
 
 def provenance_path(output_path: Path) -> Path:
@@ -38,18 +43,26 @@ def provenance_path(output_path: Path) -> Path:
 
 
 def _fingerprint_payload(metadata: dict[str, Any]) -> dict[str, Any]:
-    """Return fields that define the computation independently of output bytes."""
-    return {
-        "schema_version": metadata["schema_version"],
-        "source_sha256": metadata["source_sha256"],
-        "producer_sha256": metadata["producer_sha256"],
-        "tool_versions": metadata["tool_versions"],
-        "protocol": metadata["protocol"],
-    }
+    """Return path-independent fields that define the computation."""
+    keys = (
+        "schema_version",
+        "artifact_kind",
+        "config_sha256",
+        "source_sha256",
+        "receptor_sha256",
+        "ligand_sha256",
+        "producer_sha256",
+        "runner_sha256",
+        "parser_sha256",
+        "smina_version",
+        "tool_versions",
+        "protocol",
+    )
+    return {key: metadata[key] for key in keys if key in metadata}
 
 
 def build_fingerprint(metadata: dict[str, Any]) -> str:
-    """Build a stable computation fingerprint."""
+    """Build a stable path-independent computation fingerprint."""
     encoded = json.dumps(
         _fingerprint_payload(metadata),
         sort_keys=True,
@@ -58,16 +71,47 @@ def build_fingerprint(metadata: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def build_metadata(
+    *,
+    config_path: Path,
+    receptor_path: Path,
+    ligand_path: Path,
+    runner_path: Path,
+    parser_path: Path,
+    smina_version: str,
+    command: list[str],
+) -> dict[str, Any]:
+    """Build provenance metadata for one standardized docking pose."""
+    metadata: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "artifact_kind": "standardized_docking_pose",
+        "config_sha256": sha256_file(config_path),
+        "receptor_sha256": sha256_file(receptor_path),
+        "ligand_sha256": sha256_file(ligand_path),
+        "runner_sha256": sha256_file(runner_path),
+        "parser_sha256": sha256_file(parser_path),
+        "smina_version": smina_version,
+        "protocol": {
+            "command": list(command),
+            "command_paths_are_excluded_from_fingerprint": True,
+        },
+    }
+    metadata["fingerprint"] = build_fingerprint(metadata)
+    return metadata
+
+
 def build_artifact_metadata(
     *,
     source_path: Path,
     producer_path: Path,
     tool_versions: dict[str, str],
     protocol: dict[str, Any],
+    artifact_kind: str,
 ) -> dict[str, Any]:
-    """Build metadata for a derived structural artifact."""
+    """Build metadata for a generic derived structural artifact."""
     metadata: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
+        "artifact_kind": artifact_kind,
         "source_sha256": sha256_file(source_path),
         "producer_sha256": sha256_file(producer_path),
         "tool_versions": dict(sorted(tool_versions.items())),
@@ -93,19 +137,28 @@ def write_metadata(
     path: Path,
     metadata: dict[str, Any],
     *,
-    output_path: Path,
+    output_path: Path | None = None,
+    output_sha256: str | None = None,
     affinity: float | None = None,
+    extra: dict[str, Any] | None = None,
 ) -> None:
     """Write metadata including the exact output-file hash."""
-    payload = {
+    if output_sha256 is None:
+        if output_path is None:
+            raise ValueError("output_path or output_sha256 is required")
+        output_sha256 = sha256_file(output_path)
+
+    payload: dict[str, Any] = {
         **metadata,
-        "output_sha256": sha256_file(output_path),
+        "output_sha256": output_sha256,
     }
     if affinity is not None:
         payload["affinity"] = affinity
+    if extra:
+        payload.update(extra)
+
     path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "
-",
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
 
@@ -116,7 +169,7 @@ def validate_existing_artifact(
     metadata_path: Path,
     expected_metadata: dict[str, Any],
 ) -> bool:
-    """Return True only when output bytes and computation fingerprint both match."""
+    """Return True only when fingerprint and output bytes both match."""
     metadata = load_metadata(metadata_path)
     if metadata is None:
         return False
@@ -134,7 +187,7 @@ def validate_existing_output(
     expected_metadata: dict[str, Any],
     expected_affinity: float | None = None,
 ) -> bool:
-    """Backward-compatible docking-output validation including affinity."""
+    """Validate an existing docking output, including its recorded affinity."""
     if not validate_existing_artifact(
         output_path=output_path,
         metadata_path=metadata_path,
@@ -142,12 +195,13 @@ def validate_existing_output(
     ):
         return False
 
-    metadata = load_metadata(metadata_path)
     if expected_affinity is None:
         return True
+
+    metadata = load_metadata(metadata_path)
     try:
         return float(metadata.get("affinity")) == expected_affinity
-    except (TypeError, ValueError):
+    except (AttributeError, TypeError, ValueError):
         return False
 
 
