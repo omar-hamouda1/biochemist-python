@@ -9,7 +9,7 @@
 #   make merge      — Merge docking + ADMET results
 # ──────────────────────────────────────────────────────────────────────
 
-.PHONY: setup test lint clean merge help
+.PHONY: setup test lint audit compile clean merge lab help
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -21,6 +21,12 @@ setup: ## Create conda environment from environment.yml
 
 test: ## Run all unit tests with pytest
 	pytest tests/ -v --tb=short
+
+audit: ## Audit the authoritative standardized docking state
+	python -m scripts.audit_docking
+
+compile: ## Compile Python source files without executing them
+	python -m compileall -q src scripts tests
 
 lint: ## Check code style with flake8
 	flake8 src/ scripts/ --max-line-length=100 --ignore=E501,W503
