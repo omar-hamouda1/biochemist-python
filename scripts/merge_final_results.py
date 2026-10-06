@@ -31,7 +31,7 @@ def load_docking_results(path: Path, expected_ligands: int):
     df["affinity"] = pd.to_numeric(df["affinity"], errors="coerce")
     df = (
         df.dropna(subset=["affinity"])
-        .sort_values("affinity")
+        .sort_values(["affinity", "ligand_id"], kind="mergesort")
         .reset_index(drop=True)
     )
 
