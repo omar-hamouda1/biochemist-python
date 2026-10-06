@@ -53,7 +53,7 @@ def load_top_hits(report_path: Path, expected_count: int = TOP_N):
         ranking["status"].isin(["ok", "existing"])
     ].dropna(subset=["affinity"])
 
-    ranking = ranking.sort_values("affinity").reset_index(drop=True)
+    ranking = ranking.sort_values(["affinity", "ligand_id"], kind="mergesort").reset_index(drop=True)
 
     top = ranking.head(expected_count)
     if len(top) != expected_count:
