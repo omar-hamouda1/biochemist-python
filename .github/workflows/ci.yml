@@ -32,6 +32,10 @@ jobs:
           python --version
           conda list | head -20
 
+      - name: Compile Python workflow modules
+        run: |
+          python -m compileall -q src scripts tests
+
       - name: Run unit tests
         run: |
           pytest tests/ -v --tb=short
