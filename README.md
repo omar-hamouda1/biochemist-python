@@ -52,7 +52,7 @@ The project combines **educational Jupyter notebooks** with reusable Python modu
 | **Docking audit**         | `scripts/audit_docking.py`   |
 | **Automated tests**       | 30 passing                   |
 
-The standardized screening workflow is configuration-driven and uses a single authoritative docking configuration rather than duplicating docking parameters across multiple scripts.
+The standardized screening workflow is configuration-driven and uses a single authoritative docking configuration rather than duplicating docking parameters across multiple scripts. Exact validation environments are captured separately by the provenance workflow; `environment.yml` is the reproducible environment specification, while the captured environment snapshot records the concrete packages used for a particular validated run.
 
 ---
 
@@ -199,6 +199,18 @@ python -m scripts.run_standardized_docking
 ```
 
 This workflow is resumable: valid existing docking outputs are reused rather than recomputed.
+
+### Record reproducibility provenance
+
+After preparing the receptor and ligands and completing standardized docking, capture the exact local environment and build the tracked provenance record:
+
+```bash
+python -m scripts.capture_environment
+python -m scripts.build_provenance_manifest
+python -m scripts.audit_docking --check-artifacts --check-provenance
+```
+
+The provenance manifest records configuration, receptor, prepared-ligand, docking-output, code, tool-version, and environment hashes. Generated PDBQT sidecars remain local integrity guards; the tracked manifest is the reviewable run-level record.
 
 ### Audit the standardized results
 
