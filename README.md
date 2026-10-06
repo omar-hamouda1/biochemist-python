@@ -13,7 +13,7 @@
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?logo=jupyter)](https://jupyter.org/)
 [![RDKit](https://img.shields.io/badge/RDKit-2024-green)](https://www.rdkit.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-31%20passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-32%20passed-brightgreen)](tests/)
 [![Conda](https://img.shields.io/badge/conda-environment-green?logo=anaconda)](environment.yml)
 
 ---
@@ -382,7 +382,7 @@ These MD and MM-PBSA results are historical/reference-system results and should 
 
 ## 🧪 Testing and Validation
 
-The repository currently contains **31 automated tests**, all passing in the validated development environment:
+The repository currently contains **32 automated tests**, all passing in the validated development environment:
 
 ```bash
 pytest -q
@@ -391,7 +391,7 @@ pytest -q
 Current result:
 
 ```text
-31 passed
+32 passed
 ```
 
 The test suite covers:
