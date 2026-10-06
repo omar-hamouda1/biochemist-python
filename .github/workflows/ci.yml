@@ -72,5 +72,5 @@ jobs:
                   errors += 1
           if errors:
               sys.exit(1)
-          print(f'\nAll {len(glob.glob(\"notebooks/*.ipynb\"))} notebooks valid.')
+          print(f'\nAll {len(notebook_paths)} notebooks valid.')
           "
