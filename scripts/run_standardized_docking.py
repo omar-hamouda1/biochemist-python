@@ -18,7 +18,7 @@ from src.provenance import (
 from pathlib import Path
 
 from src.docking import parse_smina_output
-from src.docking_config import DockingConfig, load_docking_config
+from src.docking_config import DEFAULT_CONFIG_PATH, DockingConfig, load_docking_config
 
 
 def build_smina_command(
@@ -142,7 +142,7 @@ def run_one(
 
 
 def main() -> None:
-    config_path = Path("configs/docking_config.yml").resolve()
+    config_path = DEFAULT_CONFIG_PATH
     config = load_docking_config(config_path)
     runner_path = Path(__file__).resolve()
     parser_path = (Path(__file__).resolve().parents[1] / "src" / "docking.py").resolve()
