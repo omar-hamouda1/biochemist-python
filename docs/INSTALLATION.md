@@ -187,7 +187,7 @@ Run the complete test suite:
 pytest -q
 ```
 
-The repository currently contains 28 automated tests covering the core reusable modules and standardized docking configuration/utilities.
+The repository currently contains 30 automated tests covering the core reusable modules and standardized docking configuration/utilities.
 
 To check Python syntax for the project scripts:
 
