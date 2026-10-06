@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from src.docking import parse_smina_output, get_top_hits
+from scripts.run_standardized_docking import parse_affinity
 
 
 AFFINITIES_CSV = Path("docking/results/standardized_affinities.csv")
@@ -60,3 +61,13 @@ class TestGetTopHits:
             "12U",
             "T87",
         ]
+
+
+def test_standardized_parser_rejects_multiple_affinities(tmp_path):
+    pdbqt = tmp_path / "multi_out.pdbqt"
+    pdbqt.write_text(
+        "REMARK minimizedAffinity -8.5\n"
+        "ATOM      1  C   LIG     1       0.000   0.000   0.000\n"
+        "REMARK minimizedAffinity -7.2\n"
+    )
+    assert parse_affinity(pdbqt) is None
