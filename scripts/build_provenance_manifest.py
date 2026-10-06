@@ -156,6 +156,14 @@ def main() -> None:
             "path": str(Path("configs/docking_config.yml")),
             "sha256": sha256_file(PROJECT_ROOT / "configs" / "docking_config.yml"),
         },
+        "environment_snapshot": {
+            "path": str(Path("docking/results/standardized_environment.txt")),
+            "sha256": (
+                sha256_file(PROJECT_ROOT / "docking" / "results" / "standardized_environment.txt")
+                if (PROJECT_ROOT / "docking" / "results" / "standardized_environment.txt").exists()
+                else None
+            ),
+        },
         "authoritative_files": {
             "validated_manifest": {
                 "path": str(config.manifest.relative_to(PROJECT_ROOT)),
