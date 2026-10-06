@@ -1,7 +1,7 @@
 ligand_id,affinity,status,message,rank,n_interactions,n_residues,interaction_types,MW,LogP,HBD,HBA,TPSA,RotB,Lipinski_Violations,Lipinski_Verdict,Veber_Violations,Veber_Verdict,PAINS_Alerts,PAINS_Verdict
-R11,-9.7876091,ok,,1,14.0,9.0,VdWContact:8; Hydrophobic:3; HBDonor:2; HBAcceptor:1,402.36,1.24,3.0,6.0,97.54,6.0,0.0,Excellent,0.0,Pass,0.0,Clean
-13U,-9.51114082,ok,,2,11.0,8.0,VdWContact:8; HBDonor:3,383.33,-1.01,4.0,4.0,111.31,7.0,0.0,Excellent,0.0,Pass,0.0,Clean
-BAH,-9.41380882,ok,,3,23.0,20.0,VdWContact:19; Cationic:2; Hydrophobic:1; HBDonor:1,366.38,-3.45,8.0,4.0,201.04,6.0,1.0,Acceptable,1.0,Fail,0.0,Clean
+R11,-9.7876091,ok,,1,14.0,8.0,VdWContact:7; Hydrophobic:3; HBDonor:3; HBAcceptor:1,402.36,1.24,3.0,6.0,97.54,6.0,0.0,Excellent,0.0,Pass,0.0,Clean
+13U,-9.51114082,ok,,2,12.0,9.0,VdWContact:9; HBDonor:3,383.33,-1.01,4.0,4.0,111.31,7.0,0.0,Excellent,0.0,Pass,0.0,Clean
+BAH,-9.41380882,ok,,3,25.0,19.0,VdWContact:18; HBDonor:4; Cationic:2; Hydrophobic:1,366.38,-3.45,8.0,4.0,201.04,6.0,1.0,Acceptable,1.0,Fail,0.0,Clean
 12U,-9.3740406,ok,,4,11.0,9.0,VdWContact:9; HBDonor:2,371.32,-1.09,4.0,4.0,111.31,7.0,0.0,Excellent,0.0,Pass,0.0,Clean
 T87,-9.27052689,ok,,5,15.0,11.0,VdWContact:8; Hydrophobic:3; HBDonor:2; PiStacking:1; PiCation:1,498.4,0.89,2.0,9.0,138.28,11.0,0.0,Excellent,1.0,Fail,0.0,Clean
 607,-9.2651825,ok,,6,,,,,,,,,,,,,,,
