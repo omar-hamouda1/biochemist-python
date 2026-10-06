@@ -97,7 +97,7 @@ Stage 6: Analysis            Stage 5: Properties         Stage 4: Docking
 
 ---
 
-## Stage 4: Standardized Virtual Screening (Notebook 14 + standardized docking script)
+## Stage 4: Standardized Virtual Screening
 
 ### What You Learn
 
@@ -116,11 +116,27 @@ The current standardized screening is implemented by:
 scripts/run_standardized_docking.py
 ```
 
-The configuration is documented in:
+The authoritative runtime configuration is:
 
 ```text
 configs/docking_config.yml
 ```
+
+The docking script loads and validates this YAML at runtime; production docking parameters and paths are not duplicated as independent constants in the script.
+
+Run the authoritative workflow from the repository root as:
+
+```bash
+python -m scripts.run_standardized_docking
+```
+
+The companion audit for the authoritative report is:
+
+```bash
+python -m scripts.audit_docking
+```
+
+Use `--check-artifacts` with the audit when generated receptor, ligand, and docking PDBQT files are available locally.
 
 The validated ligand manifest is:
 
@@ -140,7 +156,7 @@ Number of modes: 1
 Random seed: 42
 ```
 
-The standardized run was performed for the validated 111-ligand set.
+The standardized run is defined for the validated 111-ligand set. The expected ligand count, manifest, report path, timeout, and Smina executable are controlled by `configs/docking_config.yml`.
 
 The authoritative docking report is:
 

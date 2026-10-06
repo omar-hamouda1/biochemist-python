@@ -1,246 +1,537 @@
 # 🧬 Biochemist Python — Computational Drug Discovery Pipeline
 
-> **A complete hands-on workshop:** from Python basics to Molecular Dynamics Simulation.  
-> **Target:** Trypsin (`2ZQ2`) — Serine Protease | **Task:** Virtual screening of 117 ligands
+> **A hands-on computational drug discovery workshop for biochemists and life-science learners**
+> From Python fundamentals and structural bioinformatics to virtual screening, ADMET analysis, and molecular dynamics.
 
-[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)](https://www.python.org/downloads/release/python-3110/)
+**Target:** Trypsin (`2ZQ2`) — Serine Protease
+**Reference ligand:** `13U`
+**Screening library:** 117 ligands
+**Validated docking set:** 111 ligands
+**Documented exceptions:** 6 ligands
+
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?logo=python\&logoColor=white)](https://www.python.org/downloads/release/python-3110/)
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?logo=jupyter)](https://jupyter.org/)
 [![RDKit](https://img.shields.io/badge/RDKit-2024-green)](https://www.rdkit.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
-[![CI](https://github.com/omar-hamouda1/biochemist-python/actions/workflows/ci.yml/badge.svg)](https://github.com/omar-hamouda1/biochemist-python/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-28%20passed-brightgreen)](tests/)
 [![Conda](https://img.shields.io/badge/conda-environment-green?logo=anaconda)](environment.yml)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Tests](https://img.shields.io/badge/tests-19%20passed-brightgreen)](tests/)
+
 ---
 
 ## 📌 Overview
 
-This project implements a **complete computational drug discovery pipeline** designed for biochemists learning Python. Starting from zero Python knowledge, it walks through every stage of a real drug discovery workflow — all applied to a real protein target.
+**Biochemist Python** is a complete educational computational drug discovery pipeline built around a real protein target and a real screening workflow.
 
-| | Details |
-|---|---|
-| 🎯 **Protein Target** | Trypsin — Serine Protease (EC 3.4.21.4) — PDB: [`2ZQ2`](https://www.rcsb.org/structure/2ZQ2) |
-| 💊 **Reference Ligand** | `13U` (co-crystallized inhibitor) |
-| 📚 **Screening Library** | 117 ligands from PDB (EC class 3.4.21) |
-| 🧪 **Standardized Docking Set** | 111 validated ligands |
-| 🏆 **Current Top Hit** | `R11` at **-9.79 kcal/mol** in the standardized docking run |
+The project is designed to help biochemists learn how computational methods fit together in a practical research pipeline, including:
+
+* Python programming and data analysis
+* Protein and ligand structure handling
+* Molecular visualization
+* Ligand discovery from structural databases
+* Binding-site analysis
+* Standardized molecular docking
+* Rule-based ADMET filtering
+* Protein–ligand interaction analysis
+* Molecular dynamics simulation and trajectory analysis
+
+The project combines **educational Jupyter notebooks** with reusable Python modules, automated tests, configuration-driven docking, and dedicated audit utilities.
+
+---
+
+## 🎯 Current Scientific Workflow
+
+| Item                      | Current project state        |
+| ------------------------- | ---------------------------- |
+| **Protein target**        | Trypsin — PDB `2ZQ2`         |
+| **Reference ligand**      | `13U`                        |
+| **Screening library**     | 117 ligands                  |
+| **Validated docking set** | 111 ligands                  |
+| **Documented exceptions** | 6 ligands                    |
+| **Docking engine**        | Smina                        |
+| **Docking configuration** | `configs/docking_config.yml` |
+| **Docking audit**         | `scripts/audit_docking.py`   |
+| **Automated tests**       | 28 passing                   |
+
+The standardized screening workflow is configuration-driven and uses a single authoritative docking configuration rather than duplicating docking parameters across multiple scripts.
 
 ---
 
 ## 🗺️ Pipeline
 
-```
- ┌─────────────────────────────────────────────────────────────────────────┐
- │                                                                         │
- │   Python ──► Data ──► Structures ──► 3D Viz ──► Ligand Discovery       │
- │   Basics     Analysis  (Biopython)   (py3Dmol)   (117 ligands)          │
- │   NB:01-04   NB:05-08  NB:09         NB:10-11    NB:12                  │
- │                                                       │                 │
- │                                                       ▼                 │
- │   Final     MD Sim   ◄── ADMET ◄── Docking ◄── Binding Site           │
- │   Hits      Analysis     Filter     (Vina)      Investigation          │
- │             NB:16        NB:15      NB:14       NB:13                   │
- │                                                                         │
- └─────────────────────────────────────────────────────────────────────────┘
+```text
+Python Foundations
+        │
+        ▼
+Data Analysis
+        │
+        ▼
+Structural Bioinformatics
+        │
+        ▼
+3D Visualization
+        │
+        ▼
+Ligand Discovery
+      (117)
+        │
+        ▼
+Binding-Site Analysis
+        │
+        ▼
+Standardized Virtual Screening
+        │
+        ├── Smina
+        ├── 111 validated ligands
+        ├── 6 documented exceptions
+        └── automated audit
+        │
+        ▼
+ADMET / Rule-Based Filtering
+        │
+        ▼
+Protein–Ligand Interaction Analysis
+        │
+        ▼
+Molecular Dynamics
+        │
+        ▼
+Trajectory / Stability Analysis
 ```
 
-> 📖 For a detailed walkthrough of each stage, see [`docs/PIPELINE.md`](docs/PIPELINE.md).
+For the detailed stage-by-stage workflow, see [`docs/PIPELINE.md`](docs/PIPELINE.md).
 
 ---
 
 ## ⚡ Quick Start
 
+### 1. Clone the repository
+
 ```bash
-# 1. Clone
 git clone https://github.com/omar-hamouda1/biochemist-python.git
 cd biochemist-python
-
-# 2. Create environment
-conda env create -f environment.yml
-conda activate biochem
-
-# 3. Run notebooks
-jupyter lab
-# Navigate to notebooks/ → start with 01_python_basics.ipynb
 ```
 
-> 📖 For detailed setup (including WSL, VS Code, and external tools), see [`docs/INSTALLATION.md`](docs/INSTALLATION.md).
+### 2. Create the Conda environment
+
+```bash
+conda env create -f environment.yml
+```
+
+Activate the environment defined by your local `environment.yml`.
+
+For the development environment used during validation of this project:
+
+```bash
+conda activate biochem-vscode
+```
+
+### 3. Launch JupyterLab
+
+```bash
+jupyter lab
+```
+
+Then open:
+
+```text
+notebooks/
+```
+
+and begin with:
+
+```text
+01_python_basics.ipynb
+```
+
+For complete installation instructions, including VS Code, WSL, external tools, and environment setup, see [`docs/INSTALLATION.md`](docs/INSTALLATION.md).
 
 ---
 
-## 📓 Notebooks
+## 📓 Educational Notebooks
 
-| # | Notebook | Topic | Stage |
-|---|----------|-------|-------|
-| 01 | [`01_python_basics.ipynb`](notebooks/01_python_basics.ipynb) | Python fundamentals for biochemists | Foundations |
-| 02 | [`02_file_parsing.ipynb`](notebooks/02_file_parsing.ipynb) | Parsing CSV and PDB files | Foundations |
-| 03 | [`03_multiple_files.ipynb`](notebooks/03_multiple_files.ipynb) | Processing multiple files with `glob` | Foundations |
-| 04 | [`04_pandas.ipynb`](notebooks/04_pandas.ipynb) | Data analysis with Pandas | Foundations |
-| 05 | [`05_linear_regression.ipynb`](notebooks/05_linear_regression.ipynb) | Bradford protein assay — linear fit | Data Analysis |
-| 06 | [`06_plots.ipynb`](notebooks/06_plots.ipynb) | Publication-quality plots | Data Analysis |
-| 07 | [`07_nonlinear_regression_part1.ipynb`](notebooks/07_nonlinear_regression_part1.ipynb) | Michaelis-Menten kinetics (Part 1) | Data Analysis |
-| 08 | [`08_nonlinear_regression_part2.ipynb`](notebooks/08_nonlinear_regression_part2.ipynb) | Enzyme inhibition kinetics (Part 2) | Data Analysis |
-| 09 | [`09_biopython_mmcif.ipynb`](notebooks/09_biopython_mmcif.ipynb) | Structural bioinformatics with Biopython | Structure |
-| 10 | [`10_rcsb_web_api.ipynb`](notebooks/10_rcsb_web_api.ipynb) | RCSB PDB REST API queries | Structure |
-| 11 | [`11_icn3d_visualization.ipynb`](notebooks/11_icn3d_visualization.ipynb) | 3D structure visualization (iCN3D/py3Dmol) | Structure |
-| 12 | [`12_ec_class_ligands.ipynb`](notebooks/12_ec_class_ligands.ipynb) | Ligand discovery by EC class — **117 ligands** | Discovery |
-| 13 | [`13_binding_site.ipynb`](notebooks/13_binding_site.ipynb) | Binding site analysis with MDAnalysis | Discovery |
-| 14 | [`14_molecular_docking.ipynb`](notebooks/14_molecular_docking.ipynb) | Virtual screening with AutoDock Vina | Docking |
-| 15 | [`15_admet_prediction.ipynb`](notebooks/15_admet_prediction.ipynb) | ADMET / Lipinski Ro5 filtering | ADMET |
-| 16 | [`16_md_analysis.ipynb`](notebooks/16_md_analysis.ipynb) | MD simulation & trajectory analysis | MD/Analysis |
+| #  | Notebook                                                                               | Topic                                            | Stage         |
+| -- | -------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------- |
+| 01 | [`01_python_basics.ipynb`](notebooks/01_python_basics.ipynb)                           | Python fundamentals for biochemists              | Foundations   |
+| 02 | [`02_file_parsing.ipynb`](notebooks/02_file_parsing.ipynb)                             | Parsing CSV and PDB files                        | Foundations   |
+| 03 | [`03_multiple_files.ipynb`](notebooks/03_multiple_files.ipynb)                         | Processing multiple files with `glob`            | Foundations   |
+| 04 | [`04_pandas.ipynb`](notebooks/04_pandas.ipynb)                                         | Data analysis with Pandas                        | Foundations   |
+| 05 | [`05_linear_regression.ipynb`](notebooks/05_linear_regression.ipynb)                   | Bradford protein assay — linear fit              | Data Analysis |
+| 06 | [`06_plots.ipynb`](notebooks/06_plots.ipynb)                                           | Publication-quality plots                        | Data Analysis |
+| 07 | [`07_nonlinear_regression_part1.ipynb`](notebooks/07_nonlinear_regression_part1.ipynb) | Michaelis–Menten kinetics                        | Data Analysis |
+| 08 | [`08_nonlinear_regression_part2.ipynb`](notebooks/08_nonlinear_regression_part2.ipynb) | Enzyme inhibition kinetics                       | Data Analysis |
+| 09 | [`09_biopython_mmcif.ipynb`](notebooks/09_biopython_mmcif.ipynb)                       | Structural bioinformatics with Biopython         | Structure     |
+| 10 | [`10_rcsb_web_api.ipynb`](notebooks/10_rcsb_web_api.ipynb)                             | RCSB PDB REST API queries                        | Structure     |
+| 11 | [`11_icn3d_visualization.ipynb`](notebooks/11_icn3d_visualization.ipynb)               | 3D structure visualization                       | Structure     |
+| 12 | [`12_ec_class_ligands.ipynb`](notebooks/12_ec_class_ligands.ipynb)                     | Ligand discovery by EC class — 117 ligands       | Discovery     |
+| 13 | [`13_binding_site.ipynb`](notebooks/13_binding_site.ipynb)                             | Binding-site analysis with MDAnalysis and ProLIF | Discovery     |
+| 14 | [`14_molecular_docking.ipynb`](notebooks/14_molecular_docking.ipynb)                   | Molecular docking concepts and workflow          | Docking       |
+| 15 | [`15_admet_prediction.ipynb`](notebooks/15_admet_prediction.ipynb)                     | ADMET / Lipinski Ro5 filtering                   | ADMET         |
+| 16 | [`16_md_analysis.ipynb`](notebooks/16_md_analysis.ipynb)                               | MD simulation and trajectory analysis            | MD / Analysis |
 
-> **Run order:** Notebooks 01 → 16 sequentially. Each notebook builds on the previous.
-
----
-
-## 🏆 Key Results
-
-### Top 5 Standardized Virtual Screening Hits
-
-| Rank | Ligand | Affinity (kcal/mol) | Lipinski | Veber | PAINS |
-|------|--------|---------------------|----------|--------|-------|
-| 1 | **R11** | **-9.79** | Excellent | Pass | Clean |
-| 2 | **13U** | **-9.51** | Excellent | Pass | Clean |
-| 3 | **BAH** | **-9.41** | Acceptable | Fail | Clean |
-| 4 | **12U** | **-9.37** | Excellent | Pass | Clean |
-| 5 | **T87** | **-9.27** | Excellent | Fail | Clean |
-
-> **Interpretation:** These are standardized docking scores followed by
-> RDKit descriptor/rule-based filtering and ProLIF interaction analysis.
-> They are not experimental activity measurements or full ADME/toxicity
-> predictions.
-
-### MD Simulation Highlights
-
-The MD results below describe the historical **13U–Trypsin reference-ligand
-system**. They should not be interpreted as MD validation of the current
-standardized docking top hit R11.
-
-**System:** 13U–Trypsin complex in explicit TIP3P water + 0.15 M NaCl (24,590 atoms, 64.2 Å box).
-
-**Simulation:** 5 ns production run on NVIDIA Tesla T4 GPU (196 ns/day).
-
-**Stability:**
-- Protein backbone RMSD: **0.84 Å**
-- Ligand RMSD: **1.57 Å**
-- Ligand RMSF: **1.07 Å** (0/65 atoms exceed 3 Å)
-
-**Binding Energy (MM-PBSA):**
-- **ΔG_binding = −32.13 ± 17.22 kcal/mol**
-- VdW contribution: −34.32 kcal/mol
-- Electrostatics: −11.22 kcal/mol
-
-**Key Binding Residues (ProLIF, occupancy > 70%):**
-- ASP171, SER172, SER192 — VdW + H-bond (78%)
-- GLY196 — VdW (74%)
-- **TRP193** — Anchor residue (VdW, 70%, ΔG = −3.03 kcal/mol)
+> **Important:** The notebooks are educational material. The **authoritative standardized virtual-screening workflow** is the Python docking module and its validated configuration, not a notebook execution order.
 
 ---
 
-## 💾 Data Availability
+## 🎯 Authoritative Standardized Docking Workflow
 
-The large MD trajectory files (`*.dcd`, `*.nc`) exceed GitHub's file size limits and are **not** included in this repository.
+The production-standardized docking workflow is:
 
-To run Notebook 16, download the MD simulation data and extract into `md/colab_workshop/02_analysis/`.
+```text
+scripts/run_standardized_docking.py
+```
+
+Its authoritative runtime configuration is:
+
+```text
+configs/docking_config.yml
+```
+
+The configuration defines the docking box, Smina settings, expected ligand count, input/output paths, manifest, and report location.
+
+### Run standardized docking
+
+From the repository root:
+
+```bash
+python -m scripts.run_standardized_docking
+```
+
+This workflow is resumable: valid existing docking outputs are reused rather than recomputed.
+
+### Audit the standardized results
+
+Report-level audit:
+
+```bash
+python -m scripts.audit_docking
+```
+
+Local artifact integrity audit:
+
+```bash
+python -m scripts.audit_docking --check-artifacts
+```
+
+The validated project state currently passes both audits:
+
+```text
+Candidate ligands       : 117
+Validated ligands       : 111
+Documented exceptions   : 6
+Reported ligands        : 111
+Expected validated     : 111
+Status                  : PASS
+```
+
+The six documented exceptions are kept outside the validated screening set rather than being silently included or discarded.
 
 ---
 
-## 🛠️ Tech Stack
+## 🧪 Docking Configuration
 
-| Category | Tools |
-|----------|-------|
-| **Core** | Python 3.11, NumPy, Pandas, SciPy |
-| **Structure Analysis** | Biopython, MDAnalysis |
-| **Cheminformatics** | RDKit, rcsbsearchapi |
-| **Docking** | AutoDock Vina / Smina, Open Babel |
-| **Interaction Analysis** | ProLIF |
-| **Visualization** | py3Dmol, NGLView, iCN3D, Matplotlib, Seaborn |
-| **MD Simulation** | OpenMM |
-| **ADMET** | RDKit descriptors |
-| **Testing** | pytest |
+The standardized protocol is defined in:
+
+```text
+configs/docking_config.yml
+```
+
+Current key parameters include:
+
+```yaml
+target_pdb: 2ZQ2
+reference_ligand: 13U
+
+center_x: 17.672
+center_y: -8.256
+center_z: 10.688
+
+size_x: 25.0
+size_y: 25.0
+size_z: 25.0
+
+smina_executable: smina
+exhaustiveness: 4
+num_modes: 1
+seed: 42
+timeout_seconds: 300
+
+expected_ligands: 111
+```
+
+The former standalone box configuration file:
+
+```text
+docking/box_config.txt
+```
+
+has been retired in favor of the single validated YAML configuration.
+
+---
+
+## 🏆 Standardized Virtual Screening Results
+
+The current standardized screening ranks the following compounds highest by docking score:
+
+| Rank | Ligand  | Docking score (kcal/mol) | Lipinski   | Veber | PAINS |
+| ---: | ------- | -----------------------: | ---------- | ----- | ----- |
+|    1 | **R11** |                **-9.79** | Excellent  | Pass  | Clean |
+|    2 | **13U** |                **-9.51** | Excellent  | Pass  | Clean |
+|    3 | **BAH** |                **-9.41** | Acceptable | Fail  | Clean |
+|    4 | **12U** |                **-9.37** | Excellent  | Pass  | Clean |
+|    5 | **T87** |                **-9.27** | Excellent  | Fail  | Clean |
+
+These values are **docking scores**, not experimental binding measurements.
+
+Docking results should therefore be interpreted as computational ranking evidence rather than direct measurements of biochemical potency or affinity.
+
+---
+
+## 🔬 Binding-Site and Interaction Analysis
+
+Notebook 13 performs binding-site and protein–ligand interaction analysis for the Trypsin–`13U` reference system.
+
+The validated structure-preparation workflow includes:
+
+* deterministic protein alternate-location resolution
+* PDB2PQR-based protein protonation
+* RDKit ligand bond-order assignment
+* Open Babel hydrogen addition
+* ProLIF interaction analysis
+
+The current validated ProLIF analysis identifies interactions involving residues including:
+
+```text
+ASN97.A
+ASP189.A
+GLN175.A
+GLN192.A
+GLY216.A
+GLY219.A
+LEU99.A
+SER190.A
+SER195.A
+SER214.A
+THR98.A
+TRP215.A
+```
+
+This analysis is intended to support structural interpretation of the docking results rather than to replace experimental validation.
+
+---
+
+## 🧬 Molecular Dynamics Highlights
+
+The MD results in this repository describe the historical **13U–Trypsin reference-ligand system**.
+
+They should **not** be interpreted as molecular-dynamics validation of the current standardized docking top hit `R11`.
+
+### System
+
+* Complex: Trypsin–13U
+* Solvent: explicit TIP3P water
+* Salt: 0.15 M NaCl
+* System size: 24,590 atoms
+* Box size: 64.2 Å
+
+### Simulation
+
+* Production length: 5 ns
+* Hardware: NVIDIA Tesla T4 GPU
+* Reported performance: 196 ns/day
+
+### Stability
+
+* Protein backbone RMSD: **0.84 Å**
+* Ligand RMSD: **1.57 Å**
+* Ligand RMSF: **1.07 Å**
+* Ligand atoms exceeding 3 Å RMSF: **0 / 65**
+
+### MM-PBSA
+
+* ΔG_binding: **−32.13 ± 17.22 kcal/mol**
+* van der Waals contribution: **−34.32 kcal/mol**
+* Electrostatic contribution: **−11.22 kcal/mol**
+
+### Key interaction residues
+
+For the historical 13U–Trypsin system, ProLIF identified high-occupancy interactions involving:
+
+* ASP171
+* SER172
+* SER192
+* GLY196
+* **TRP193** — anchor residue in the historical analysis
+
+These MD and MM-PBSA results are historical/reference-system results and should be interpreted separately from the current 111-ligand standardized docking campaign.
+
+---
+
+## 🧪 Testing and Validation
+
+The repository currently contains **28 automated tests**, all passing in the validated development environment:
+
+```bash
+pytest -q
+```
+
+Current result:
+
+```text
+28 passed
+```
+
+The test suite covers:
+
+* docking output parsing
+* standardized docking utilities
+* validated YAML configuration loading
+* path resolution
+* Smina command construction
+* docking-result auditing
+* validated-manifest consistency
+* documented exceptions
+* invalid or incomplete standardized reports
+
+The standardized docking audit also provides an independent project-level consistency check.
+
+---
+
+## 🛠️ Technology Stack
+
+| Category                 | Tools                                        |
+| ------------------------ | -------------------------------------------- |
+| **Programming**          | Python 3.11                                  |
+| **Data Analysis**        | NumPy, Pandas, SciPy                         |
+| **Structure Analysis**   | Biopython, MDAnalysis                        |
+| **Cheminformatics**      | RDKit, rcsbsearchapi                         |
+| **Docking**              | Smina, AutoDock Vina, Open Babel             |
+| **Interaction Analysis** | ProLIF                                       |
+| **Visualization**        | py3Dmol, NGLView, iCN3D, Matplotlib, Seaborn |
+| **Molecular Dynamics**   | OpenMM                                       |
+| **ADMET / Filtering**    | RDKit descriptors and rule-based filters     |
+| **Testing**              | pytest                                       |
 
 ---
 
 ## 📁 Project Structure
 
-```
+```text
 biochemist-python/
-├── 📓 notebooks/           # 16 Jupyter notebooks (main pipeline)
-│   └── solutions/          # Solved versions of workshop notebooks
-├── 📦 src/                 # Reusable Python modules
-│   ├── protein.py          #   Protein structure utilities
-│   ├── admet.py            #   ADMET / Lipinski calculations
-│   ├── docking.py          #   Docking result parsing
-│   └── visualization.py    #   3D visualization helpers
-├── 🧪 tests/               # Unit tests (pytest)
-├── 📜 scripts/             # Standalone analysis scripts
-├── 📊 data/                # Raw experimental data (CSV, kinetics)
-├── 🧬 pdb/                 # Protein structure files (2ZQ2)
-├── 🧬 pdb_files/           # Myoglobin CIF structures (batch)
-├── 💊 ligands/             # 117 ligand SDF files
-├── 🎯 docking/             # Docking inputs, outputs, configs
-├── ⚗️ md/                  # MD simulation (OpenMM)
-├── 📈 figures/             # Generated figures
-├── 📋 results/             # Final merged results
-├── ⚙️ configs/             # Configuration files
-├── 📖 docs/                # Documentation
-│   ├── PIPELINE.md         #   Detailed pipeline walkthrough
-│   └── INSTALLATION.md     #   Setup instructions
-├── 📚 molssi_data/         # MolSSI workshop reference
-├── environment.yml         # Conda environment specification
-├── LICENSE                 # MIT License
-├── CONTRIBUTING.md         # Contribution guidelines
-├── CODE_OF_CONDUCT.md      # Community standards
-└── CHANGELOG.md            # Version history
+│
+├── notebooks/                    # Educational Jupyter notebooks
+│   └── solutions/                # Solved workshop versions
+│
+├── src/                          # Reusable Python modules
+│   ├── protein.py                # Protein structure utilities
+│   ├── admet.py                  # ADMET / Lipinski calculations
+│   ├── docking.py                # Docking result parsing/utilities
+│   ├── docking_config.py         # Validated docking configuration model
+│   └── visualization.py          # 3D visualization helpers
+│
+├── scripts/                      # Standalone workflow scripts
+│   ├── audit_docking.py          # Standardized docking audit
+│   └── run_standardized_docking.py
+│
+├── tests/                        # Automated tests
+│
+├── configs/                      # Authoritative configuration files
+│   └── docking_config.yml
+│
+├── ligands/                      # 117 ligand SDF files
+│
+├── docking/                      # Docking inputs, manifests, results
+│   ├── ligands/
+│   ├── receptor/
+│   └── results/
+│
+├── pdb/                          # Protein and ligand structure files
+├── pdb_files/                    # Additional structural datasets
+├── md/                           # Molecular dynamics data
+├── figures/                      # Generated figures
+├── results/                      # Analysis results
+├── data/                         # Input datasets
+├── molssi_data/                  # MolSSI workshop material
+│
+├── docs/                         # Project documentation
+│   ├── PIPELINE.md
+│   └── INSTALLATION.md
+│
+├── environment.yml               # Conda environment specification
+├── requirements.txt              # Python package requirements
+├── LICENSE                       # MIT License
+├── CONTRIBUTING.md               # Contribution guidelines
+├── CODE_OF_CONDUCT.md            # Community standards
+└── CHANGELOG.md                  # Project changelog
 ```
 
 ---
 
-## 🧪 Running Tests
+## 💾 Data Availability
 
-```bash
-conda activate biochem
-pytest tests/ -v
+Large molecular-dynamics trajectory files, including:
+
+```text
+*.dcd
+*.nc
 ```
+
+are not included in the repository when they exceed practical GitHub size limits.
+
+For the full MD analysis workflow, download the required trajectory data and place it in:
+
+```text
+md/colab_workshop/02_analysis/
+```
+
+---
+
+## 📚 Documentation
+
+Detailed documentation is available in:
+
+* [`docs/INSTALLATION.md`](docs/INSTALLATION.md) — installation and environment setup
+* [`docs/PIPELINE.md`](docs/PIPELINE.md) — computational workflow and methodology
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions, corrections, documentation improvements, and scientific feedback are welcome.
+
+Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
 
 ---
 
 ## 📚 Citation
 
-If you use this pipeline in your research, please cite:
+If you use this project in teaching, research, or derived computational work, please cite:
 
 ```bibtex
-@software{hamouda2024biochemist,
+@software{hamouda2025biochemist,
   author  = {Hamouda, Omar},
   title   = {Biochemist Python: Computational Drug Discovery Pipeline},
   year    = {2025},
   url     = {https://github.com/omar-hamouda1/biochemist-python},
-  note    = {A complete workshop from Python basics to MD simulation}
+  note    = {A hands-on computational drug discovery workshop from Python fundamentals to molecular dynamics}
 }
 ```
 
 ---
 
-## 📚 References
+## 📖 References
 
-- [RCSB PDB](https://www.rcsb.org/) — Protein Data Bank
-- [MolSSI](https://molssi.org/) — Molecular Sciences Software Institute
-- [AutoDock Vina](https://vina.scripps.edu/) — Molecular Docking
-- [ProLIF](https://prolif.readthedocs.io/) — Protein-Ligand Interaction Fingerprints
-- [OpenMM](https://openmm.org/) — Molecular Dynamics Engine
-- [RDKit](https://www.rdkit.org/) — Cheminformatics Toolkit
+* [RCSB Protein Data Bank](https://www.rcsb.org/)
+* [MolSSI — Molecular Sciences Software Institute](https://molssi.org/)
+* [AutoDock Vina](https://vina.scripps.edu/)
+* [ProLIF](https://prolif.readthedocs.io/)
+* [OpenMM](https://openmm.org/)
+* [RDKit](https://www.rdkit.org/)
 
 ---
 
 ## 👤 Author
 
-**Omar Hamouda**  
+**Omar Hamouda**
 B.Sc. Chemistry, Faculty of Science — Suez Canal University
 
 ---

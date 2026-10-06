@@ -76,6 +76,20 @@ The standardized docking protocol is implemented in:
 scripts/run_standardized_docking.py
 ```
 
+Run the production docking entry point from the repository root with:
+
+```bash
+python -m scripts.run_standardized_docking
+```
+
+Its authoritative runtime configuration is loaded from:
+
+```text
+configs/docking_config.yml
+```
+
+Do not duplicate or override the production docking parameters elsewhere in the workflow.
+
 Its current protocol is:
 
 * Receptor: `docking/receptor/2zq2_receptor.pdbqt`
@@ -128,10 +142,16 @@ The repository contains educational notebooks covering the project workflow.
 
 The notebooks should be treated as educational and analysis material rather than as a required sequential execution path for reproducing the current standardized screening results.
 
-The authoritative current docking workflow is the script:
+The authoritative current docking workflow is the module:
 
 ```text
 scripts/run_standardized_docking.py
+```
+
+From the repository root, run it as:
+
+```bash
+python -m scripts.run_standardized_docking
 ```
 
 ---
@@ -167,7 +187,7 @@ Run the complete test suite:
 pytest -q
 ```
 
-The repository currently contains 19 automated tests covering the core reusable modules and standardized docking utilities.
+The repository currently contains 28 automated tests covering the core reusable modules and standardized docking configuration/utilities.
 
 To check Python syntax for the project scripts:
 

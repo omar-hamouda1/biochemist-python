@@ -1,50 +1,67 @@
-"""Resumable standardized docking for the validated 111-ligand set."""
+"""Resumable standardized docking for the validated ligand set."""
 
-from pathlib import Path
+from __future__ import annotations
+
 import csv
+import shutil
 import subprocess
+from pathlib import Path
 
-RECEPTOR = Path("docking/receptor/2zq2_receptor.pdbqt")
-LIGAND_DIR = Path("docking/ligands")
-RESULTS_DIR = Path("docking/results/standardized")
-MANIFEST = Path("docking/results/validated_ligands_111.csv")
-REPORT = Path("docking/results/standardized_affinities.csv")
-
-CENTER = (17.672, -8.256, 10.688)
-BOX_SIZE = 25.0
-EXHAUSTIVENESS = 4
-NUM_MODES = 1
-SEED = 42
-TIMEOUT_SEC = 300
+from src.docking import parse_smina_output
+from src.docking_config import DockingConfig, load_docking_config
 
 
-def parse_affinity(path: Path):
-    if not path.exists():
-        return None
-    with path.open() as handle:
-        for line in handle:
-            if line.startswith("REMARK minimizedAffinity"):
-                try:
-                    return float(line.split()[2])
-                except (ValueError, IndexError):
-                    return None
-    return None
+def build_smina_command(
+    config: DockingConfig,
+    ligand: Path,
+    output: Path,
+) -> list[str]:
+    """Build the Smina command directly from the validated config."""
+
+    return [
+        config.smina_executable,
+        "--receptor", str(config.receptor),
+        "--ligand", str(ligand),
+        "--center_x", str(config.center_x),
+        "--center_y", str(config.center_y),
+        "--center_z", str(config.center_z),
+        "--size_x", str(config.size_x),
+        "--size_y", str(config.size_y),
+        "--size_z", str(config.size_z),
+        "--exhaustiveness", str(config.exhaustiveness),
+        "--num_modes", str(config.num_modes),
+        "--seed", str(config.seed),
+        "--out", str(output),
+    ]
 
 
-def load_ligands():
-    with MANIFEST.open(newline="") as handle:
+def parse_affinity(path: Path) -> float | None:
+    """Return the first affinity recorded in a Smina output file."""
+
+    affinities = parse_smina_output(str(path))
+    return affinities[0] if affinities else None
+
+
+def load_ligands(config: DockingConfig) -> list[str]:
+    """Load and validate ligand IDs from the authoritative manifest."""
+
+    with config.manifest.open(newline="") as handle:
         rows = list(csv.DictReader(handle))
+
     ligand_ids = [row["ligand_id"] for row in rows if row.get("ligand_id")]
-    if len(ligand_ids) != 111:
-        raise ValueError(f"Expected 111 validated ligands, found {len(ligand_ids)}")
-    if len(set(ligand_ids)) != 111:
+    if len(ligand_ids) != config.expected_ligands:
+        raise ValueError(
+            f"Expected {config.expected_ligands} validated ligands, "
+            f"found {len(ligand_ids)}"
+        )
+    if len(set(ligand_ids)) != config.expected_ligands:
         raise ValueError("Validated ligand manifest contains duplicate IDs")
     return ligand_ids
 
 
-def run_one(ligand_id: str):
-    ligand = LIGAND_DIR / f"{ligand_id}.pdbqt"
-    output = RESULTS_DIR / f"{ligand_id}_out.pdbqt"
+def run_one(config: DockingConfig, ligand_id: str):
+    ligand = config.ligand_dir / f"{ligand_id}.pdbqt"
+    output = config.output_dir / f"{ligand_id}_out.pdbqt"
 
     if not ligand.exists():
         return ligand_id, None, "ligand_missing", str(ligand)
@@ -56,32 +73,20 @@ def run_one(ligand_id: str):
     if output.exists():
         output.unlink()
 
-    command = [
-        "smina",
-        "--receptor", str(RECEPTOR),
-        "--ligand", str(ligand),
-        "--center_x", str(CENTER[0]),
-        "--center_y", str(CENTER[1]),
-        "--center_z", str(CENTER[2]),
-        "--size_x", str(BOX_SIZE),
-        "--size_y", str(BOX_SIZE),
-        "--size_z", str(BOX_SIZE),
-        "--exhaustiveness", str(EXHAUSTIVENESS),
-        "--num_modes", str(NUM_MODES),
-        "--seed", str(SEED),
-        "--out", str(output),
-    ]
+    command = build_smina_command(config, ligand, output)
 
     try:
         result = subprocess.run(
             command,
             capture_output=True,
             text=True,
-            timeout=TIMEOUT_SEC,
+            timeout=config.timeout_seconds,
             check=False,
         )
+    except FileNotFoundError:
+        return ligand_id, None, "smina_missing", config.smina_executable
     except subprocess.TimeoutExpired:
-        return ligand_id, None, "timeout", f">{TIMEOUT_SEC}s"
+        return ligand_id, None, "timeout", f">{config.timeout_seconds}s"
 
     affinity = parse_affinity(output)
     if affinity is not None:
@@ -91,33 +96,41 @@ def run_one(ligand_id: str):
     return ligand_id, None, "failed", message[:300]
 
 
-def main():
-    if not RECEPTOR.exists():
-        raise FileNotFoundError(f"Missing receptor: {RECEPTOR}")
+def main() -> None:
+    config = load_docking_config()
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    ligand_ids = load_ligands()
+    if not config.receptor.exists():
+        raise FileNotFoundError(f"Missing receptor: {config.receptor}")
+    if shutil.which(config.smina_executable) is None:
+        raise FileNotFoundError(
+            f"Smina executable not found on PATH: {config.smina_executable}"
+        )
+
+    config.output_dir.mkdir(parents=True, exist_ok=True)
+    ligand_ids = load_ligands(config)
     rows = []
 
     print("=" * 80)
-    print("STANDARDIZED DOCKING — RESUMABLE 111-LIGAND RUN")
+    print(f"STANDARDIZED DOCKING — RESUMABLE {config.expected_ligands}-LIGAND RUN")
     print("=" * 80)
 
     for index, ligand_id in enumerate(ligand_ids, start=1):
-        lid, affinity, status, message = run_one(ligand_id)
-        rows.append({
-            "ligand_id": lid,
-            "affinity": affinity,
-            "status": status,
-            "message": message,
-        })
+        lid, affinity, status, message = run_one(config, ligand_id)
+        rows.append(
+            {
+                "ligand_id": lid,
+                "affinity": affinity,
+                "status": status,
+                "message": message,
+            }
+        )
         print(
             f"[{index:3d}/{len(ligand_ids)}] {lid:>5} | "
             f"{status:<14} | affinity={affinity}",
             flush=True,
         )
 
-    with REPORT.open("w", newline="") as handle:
+    with config.report.open("w", newline="") as handle:
         writer = csv.DictWriter(
             handle,
             fieldnames=["ligand_id", "affinity", "status", "message"],
@@ -135,8 +148,8 @@ def main():
     print(f"Newly docked this run: {len(newly)}")
     print(f"Reused existing valid outputs: {len(reused)}")
     print(f"Failed/timeout: {len(failed)}")
-    print(f"Report: {REPORT}")
-    print(f"Pose directory: {RESULTS_DIR}")
+    print(f"Report: {config.report}")
+    print(f"Pose directory: {config.output_dir}")
     print("=" * 80)
 
 

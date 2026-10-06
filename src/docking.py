@@ -88,34 +88,3 @@ def get_top_hits(
     """
     df = load_affinities(csv_path)
     return df.sort_values("affinity").head(n)
-
-
-def read_box_config(
-    config_path: str = "docking/box_config.txt",
-) -> Dict[str, float]:
-    """Read docking box configuration from a text file.
-
-    Parameters
-    ----------
-    config_path : str
-        Path to the docking box configuration file.
-
-    Returns
-    -------
-    dict
-        Dictionary with keys ``center_x``, ``center_y``, ``center_z``,
-        ``size_x``, ``size_y``, and ``size_z``.
-    """
-    config = {}
-
-    with open(config_path, "r") as handle:
-        for line in handle:
-            line = line.strip()
-            if line.startswith("#") or not line:
-                continue
-
-            match = re.match(r"(\w+)\s*=\s*([\d.\-]+)", line)
-            if match:
-                config[match.group(1)] = float(match.group(2))
-
-    return config

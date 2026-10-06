@@ -4,7 +4,7 @@ Biochemist Python — Computational Drug Discovery Pipeline.
 src package providing reusable modules for:
 - Protein structure handling (protein.py)
 - ADMET property descriptors (admet.py)
-- Standardized molecular docking utilities (docking.py)
+- Standardized molecular docking utilities (docking.py, docking_config.py)
 - 3D visualization helpers (visualization.py)
 """
 
@@ -14,7 +14,6 @@ from src.docking import (
     parse_smina_output,
     get_top_hits,
     load_affinities,
-    read_box_config,
 )
 
 __all__ = [
@@ -29,7 +28,6 @@ __all__ = [
     "parse_smina_output",
     "get_top_hits",
     "load_affinities",
-    "read_box_config",
 ]
 
 __version__ = "1.0.0"

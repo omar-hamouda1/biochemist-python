@@ -1,8 +1,12 @@
-# Standardized docking protocol
-# Target: Trypsin (PDB: 2ZQ2)
-# Reference ligand: 13U (co-crystallized inhibitor)
+# Authoritative standardized docking protocol.
+# All production docking parameters and file paths used by
+# scripts/run_standardized_docking.py are defined here.
 
-# Docking box (derived from reference ligand position)
+# Target metadata
+target_pdb: 2ZQ2
+reference_ligand: 13U
+
+# Docking box (derived from the reference ligand position)
 center_x: 17.672
 center_y: -8.256
 center_z: 10.688
@@ -11,10 +15,18 @@ size_y: 25.0
 size_z: 25.0
 
 # Smina parameters
+smina_executable: smina
 exhaustiveness: 4
 num_modes: 1
 seed: 42
-# Input / output
+timeout_seconds: 300
+
+# Expected validated screening set
+expected_ligands: 111
+
+# Input / output paths
 receptor: docking/receptor/2zq2_receptor.pdbqt
-ligand_dir: docking/ligands/
-output_dir: docking/results/standardized/
+ligand_dir: docking/ligands
+manifest: docking/results/validated_ligands_111.csv
+output_dir: docking/results/standardized
+report: docking/results/standardized_affinities.csv

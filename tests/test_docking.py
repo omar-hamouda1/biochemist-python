@@ -4,12 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from src.docking import parse_smina_output, get_top_hits, read_box_config
+from src.docking import parse_smina_output, get_top_hits
 
 
 AFFINITIES_CSV = Path("docking/results/standardized_affinities.csv")
-BOX_CONFIG = Path("docking/box_config.txt")
-
 
 class TestParseSminaOutput:
     """Tests for parse_smina_output()."""
@@ -62,31 +60,3 @@ class TestGetTopHits:
             "12U",
             "T87",
         ]
-
-
-@pytest.mark.skipif(
-    not BOX_CONFIG.exists(),
-    reason="Box config not available",
-)
-class TestReadBoxConfig:
-    """Tests for read_box_config()."""
-
-    def test_reads_all_keys(self):
-        config = read_box_config(str(BOX_CONFIG))
-        required_keys = [
-            "center_x",
-            "center_y",
-            "center_z",
-            "size_x",
-            "size_y",
-            "size_z",
-        ]
-
-        for key in required_keys:
-            assert key in config
-
-    def test_values_are_floats(self):
-        config = read_box_config(str(BOX_CONFIG))
-
-        for value in config.values():
-            assert isinstance(value, float)
