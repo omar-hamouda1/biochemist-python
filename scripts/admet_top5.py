@@ -23,7 +23,7 @@ def load_top_hits():
 
 
 def load_ligand(ligand_id):
-    path = os.path.join(FIXED_DIR, f"{ligand_id}_fixed.sd")
+    path = os.path.join(FIXED_DIR, f"{ligand_id}_fixed.sdf")
     if not os.path.exists(path):
         raise FileNotFoundError(path)
 
