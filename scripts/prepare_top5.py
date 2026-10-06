@@ -32,6 +32,11 @@ def element_counts(mol):
     return sorted(atom.GetSymbol() for atom in heavy.GetAtoms())
 
 
+def heavy_atom_indices(mol):
+    """Return original atom indices for non-hydrogen atoms."""
+    return [atom.GetIdx() for atom in mol.GetAtoms() if atom.GetSymbol() != "H"]
+
+
 def load_top_hits(report_path: Path, expected_count: int = TOP_N):
     ranking = pd.read_csv(report_path)
     required = {"ligand_id", "affinity", "status"}
@@ -126,8 +131,11 @@ def rebuild_from_template(template_path, pose_path, output_sdf):
     template_symbols = [a.GetSymbol() for a in template_hfree.GetAtoms()]
     pose_symbols = [a.GetSymbol() for a in pose_hfree.GetAtoms()]
 
-    for template_idx, pose_idx in enumerate(mapping):
-        if template_symbols[template_idx] != pose_symbols[pose_idx]:
+    template_heavy_indices = heavy_atom_indices(template)
+    pose_heavy_indices = heavy_atom_indices(pose)
+
+    for template_hfree_idx, pose_hfree_idx in enumerate(mapping):
+        if template_symbols[template_hfree_idx] != pose_symbols[pose_hfree_idx]:
             return False, "Graph mapping produced element mismatch"
 
     final_mol = Chem.Mol(template)
@@ -141,22 +149,23 @@ def rebuild_from_template(template_path, pose_path, output_sdf):
     pose_hfree_conf = pose_hfree.GetConformer()
     template_h_to_pose_h = {}
 
-    for template_heavy_idx, pose_heavy_idx in enumerate(mapping):
+    for template_hfree_idx, pose_hfree_idx in enumerate(mapping):
+        template_idx = template_heavy_indices[template_hfree_idx]
+        pose_idx = pose_heavy_indices[pose_hfree_idx]
+
         final_conf.SetAtomPosition(
-            template_heavy_idx,
-            pose_hfree_conf.GetAtomPosition(pose_heavy_idx),
+            template_idx,
+            pose_hfree_conf.GetAtomPosition(pose_hfree_idx),
         )
 
         template_h = [
             n.GetIdx()
-            for n in template.GetAtomWithIdx(
-                template_heavy_idx
-            ).GetNeighbors()
+            for n in template.GetAtomWithIdx(template_idx).GetNeighbors()
             if n.GetSymbol() == "H"
         ]
         pose_h = [
             n.GetIdx()
-            for n in pose.GetAtomWithIdx(pose_heavy_idx).GetNeighbors()
+            for n in pose.GetAtomWithIdx(pose_idx).GetNeighbors()
             if n.GetSymbol() == "H"
         ]
 
