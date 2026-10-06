@@ -58,12 +58,15 @@ def _fingerprint_payload(metadata: dict[str, Any]) -> dict[str, Any]:
         "tool_versions",
         "protocol",
     )
+
     payload = {key: metadata[key] for key in keys if key in metadata}
+
     protocol = payload.get("protocol")
     if isinstance(protocol, dict):
         protocol = dict(protocol)
         protocol.pop("command", None)
         payload["protocol"] = protocol
+
     return payload
 
 
@@ -74,6 +77,7 @@ def build_fingerprint(metadata: dict[str, Any]) -> str:
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
+
     return hashlib.sha256(encoded).hexdigest()
 
 
@@ -88,6 +92,7 @@ def build_metadata(
     command: list[str],
 ) -> dict[str, Any]:
     """Build provenance metadata for one standardized docking pose."""
+
     metadata: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "artifact_kind": "standardized_docking_pose",
@@ -102,7 +107,9 @@ def build_metadata(
             "command_paths_are_excluded_from_fingerprint": True,
         },
     }
+
     metadata["fingerprint"] = build_fingerprint(metadata)
+
     return metadata
 
 
@@ -115,6 +122,7 @@ def build_artifact_metadata(
     artifact_kind: str,
 ) -> dict[str, Any]:
     """Build metadata for a generic derived structural artifact."""
+
     metadata: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "artifact_kind": artifact_kind,
@@ -123,19 +131,25 @@ def build_artifact_metadata(
         "tool_versions": dict(sorted(tool_versions.items())),
         "protocol": protocol,
     }
+
     metadata["fingerprint"] = build_fingerprint(metadata)
+
     return metadata
 
 
 def load_metadata(path: Path) -> dict[str, Any] | None:
     """Load a valid JSON sidecar, returning None when missing or malformed."""
+
     if not path.exists() or path.stat().st_size == 0:
         return None
+
     try:
         with path.open(encoding="utf-8") as handle:
             metadata = json.load(handle)
+
     except (OSError, json.JSONDecodeError):
         return None
+
     return metadata if isinstance(metadata, dict) else None
 
 
@@ -149,17 +163,21 @@ def write_metadata(
     extra: dict[str, Any] | None = None,
 ) -> None:
     """Write metadata including the exact output-file hash."""
+
     if output_sha256 is None:
         if output_path is None:
             raise ValueError("output_path or output_sha256 is required")
+
         output_sha256 = sha256_file(output_path)
 
     payload: dict[str, Any] = {
         **metadata,
         "output_sha256": output_sha256,
     }
+
     if affinity is not None:
         payload["affinity"] = affinity
+
     if extra:
         payload.update(extra)
 
@@ -176,7 +194,9 @@ def validate_existing_artifact(
     expected_metadata: dict[str, Any],
 ) -> bool:
     """Return True only when fingerprint and output bytes both match."""
+
     metadata = load_metadata(metadata_path)
+
     if metadata is None:
         return False
 
@@ -194,6 +214,7 @@ def validate_existing_output(
     expected_affinity: float | None = None,
 ) -> bool:
     """Validate an existing docking output, including its recorded affinity."""
+
     if not validate_existing_artifact(
         output_path=output_path,
         metadata_path=metadata_path,
@@ -205,13 +226,27 @@ def validate_existing_output(
         return True
 
     metadata = load_metadata(metadata_path)
+
+    if metadata is None:
+        return False
+
     try:
-        return float(metadata.get("affinity")) == expected_affinity
-    except (AttributeError, TypeError, ValueError):
+        recorded_affinity = metadata.get("affinity")
+
+        if recorded_affinity is None:
+            return False
+
+        return float(recorded_affinity) == expected_affinity
+
+    except (TypeError, ValueError):
         return False
 
 
 def output_has_atoms(path: Path) -> bool:
     """Return True when a PDBQT contains at least one atom record."""
+
     with path.open(encoding="utf-8", errors="replace") as handle:
-        return any(line.startswith(("ATOM", "HETATM")) for line in handle)
+        return any(
+            line.startswith(("ATOM", "HETATM"))
+            for line in handle
+        )
