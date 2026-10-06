@@ -49,7 +49,6 @@ def _fingerprint_payload(metadata: dict[str, Any]) -> dict[str, Any]:
             "runner_sha256",
             "parser_sha256",
             "smina_version",
-            "command",
         )
     }
 
