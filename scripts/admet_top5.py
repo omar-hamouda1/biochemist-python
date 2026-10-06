@@ -28,7 +28,7 @@ def load_top_hits(report_path: Path):
     ranking = ranking[
         ranking["status"].isin(["ok", "existing"])
     ].dropna(subset=["affinity"])
-    ranking = ranking.sort_values("affinity").reset_index(drop=True)
+    ranking = ranking.sort_values(["affinity", "ligand_id"], kind="mergesort").reset_index(drop=True)
 
     top = ranking.head(TOP_N)
     if len(top) != TOP_N or top["ligand_id"].duplicated().any():
@@ -134,7 +134,7 @@ def main():
                 "PAINS_Alerts": len(alerts),
                 "PAINS_Verdict": "Clean" if not alerts else "Flagged",
                 "PAINS_Details": "; ".join(alerts),
-                "source_pose": str(path),
+                "source_pose": str(path.relative_to(PROJECT_ROOT)),
             }
         )
 
