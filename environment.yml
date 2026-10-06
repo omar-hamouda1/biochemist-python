@@ -26,6 +26,6 @@ dependencies:
   - pip:
     - prolif>=2.0.0
     - icn3dpy>=2.0.1
-    - rcsb-api>=1.7.0
+    - rcsb-api==1.7.3
     - meeko==0.8.0
     - pdb2pqr>=3.6.1
