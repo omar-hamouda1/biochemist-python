@@ -58,7 +58,13 @@ def _fingerprint_payload(metadata: dict[str, Any]) -> dict[str, Any]:
         "tool_versions",
         "protocol",
     )
-    return {key: metadata[key] for key in keys if key in metadata}
+    payload = {key: metadata[key] for key in keys if key in metadata}
+    protocol = payload.get("protocol")
+    if isinstance(protocol, dict):
+        protocol = dict(protocol)
+        protocol.pop("command", None)
+        payload["protocol"] = protocol
+    return payload
 
 
 def build_fingerprint(metadata: dict[str, Any]) -> str:
