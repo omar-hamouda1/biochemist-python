@@ -118,3 +118,17 @@ def test_existing_output_is_rejected_when_pose_changes(tmp_path):
         expected_metadata=metadata,
         expected_affinity=-8.5,
     )
+
+
+def test_fingerprint_ignores_machine_specific_command_paths(tmp_path):
+    metadata = _metadata(tmp_path)
+    alternate = dict(metadata)
+    alternate["protocol"] = dict(metadata["protocol"])
+    alternate["protocol"]["command"] = [
+        "/different/conda/env/bin/smina",
+        "--receptor",
+        "/other/worktree/receptor.pdbqt",
+    ]
+    alternate["fingerprint"] = build_fingerprint(alternate)
+
+    assert alternate["fingerprint"] == metadata["fingerprint"]
