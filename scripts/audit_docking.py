@@ -9,7 +9,17 @@ from math import isfinite
 from pathlib import Path
 from typing import Iterable
 
+from src.docking import parse_smina_output
 from src.docking_config import DockingConfig, load_docking_config
+from src.provenance import (
+    build_artifact_metadata,
+    build_metadata,
+    executable_version,
+    load_metadata,
+    provenance_path,
+    sha256_file,
+    validate_existing_output,
+)
 
 
 @dataclass(frozen=True)
@@ -108,11 +118,123 @@ def _audit_report_csv(
     return _sorted_unique(report_ids_raw)
 
 
+
+def _audit_provenance(
+    config: DockingConfig,
+    validated_ids: Iterable[str],
+    errors: list[str],
+) -> None:
+    """Audit provenance sidecars and the tracked run manifest."""
+    manifest_path = config.report.parent / "standardized_provenance.json"
+    if not manifest_path.exists():
+        errors.append(f"Missing tracked provenance manifest: {manifest_path}")
+        return
+
+    try:
+        import json
+
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        errors.append(f"Invalid provenance manifest: {exc}")
+        return
+
+    if manifest.get("schema_version") != 1:
+        errors.append("Unsupported provenance manifest schema")
+
+    expected_config_sha = sha256_file(
+        config.report.parents[2] / "configs" / "docking_config.yml"
+    )
+    if manifest.get("config", {}).get("sha256") != expected_config_sha:
+        errors.append("Provenance manifest config hash does not match current config")
+
+    receptor = config.receptor
+    receptor_meta = load_metadata(provenance_path(receptor))
+    if receptor_meta is None:
+        errors.append(f"Missing receptor provenance: {provenance_path(receptor)}")
+    elif receptor_meta.get("output_sha256") != sha256_file(receptor):
+        errors.append("Receptor provenance output hash does not match receptor")
+
+    runner_path = config.report.parents[2] / "scripts" / "run_standardized_docking.py"
+    parser_path = config.report.parents[2] / "src" / "docking.py"
+    smina_version = executable_version(config.smina_executable)
+
+    for ligand_id in validated_ids:
+        ligand = config.ligand_dir / f"{ligand_id}.pdbqt"
+        output = config.output_dir / f"{ligand_id}_out.pdbqt"
+        ligand_meta = load_metadata(provenance_path(ligand))
+
+        if ligand_meta is None:
+            errors.append(f"{ligand_id}: missing ligand provenance")
+        else:
+            if ligand_meta.get("source_sha256") != sha256_file(
+                config.report.parents[2] / "ligands" / f"{ligand_id}.sdf"
+            ):
+                errors.append(f"{ligand_id}: ligand source hash mismatch")
+            if ligand_meta.get("output_sha256") != sha256_file(ligand):
+                errors.append(f"{ligand_id}: prepared ligand hash mismatch")
+
+        output_meta = load_metadata(provenance_path(output))
+        if output_meta is None:
+            errors.append(f"{ligand_id}: missing docking provenance")
+            continue
+
+        affinities = parse_smina_output(str(output))
+        if len(affinities) != 1:
+            errors.append(
+                f"{ligand_id}: expected exactly one docking affinity, found {len(affinities)}"
+            )
+
+        expected = build_metadata(
+            config_path=config.report.parents[2] / "configs" / "docking_config.yml",
+            receptor_path=receptor,
+            ligand_path=ligand,
+            runner_path=runner_path,
+            parser_path=parser_path,
+            smina_version=smina_version,
+            command=[
+                config.smina_executable,
+                "--receptor", str(config.receptor),
+                "--ligand", str(ligand),
+                "--center_x", str(config.center_x),
+                "--center_y", str(config.center_y),
+                "--center_z", str(config.center_z),
+                "--size_x", str(config.size_x),
+                "--size_y", str(config.size_y),
+                "--size_z", str(config.size_z),
+                "--exhaustiveness", str(config.exhaustiveness),
+                "--num_modes", str(config.num_modes),
+                "--seed", str(config.seed),
+                "--out", str(output),
+            ],
+        )
+        if not validate_existing_output(
+            output_path=output,
+            metadata_path=provenance_path(output),
+            expected_metadata=expected,
+            expected_affinity=affinities[0] if len(affinities) == 1 else None,
+        ):
+            errors.append(f"{ligand_id}: docking provenance validation failed")
+
+    try:
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        current_report_sha = sha256_file(config.report)
+        recorded_report_sha = (
+            manifest_data.get("authoritative_files", {})
+            .get("standardized_report", {})
+            .get("sha256")
+        )
+        if recorded_report_sha != current_report_sha:
+            errors.append("Provenance manifest standardized-report hash is stale")
+    except (OSError, json.JSONDecodeError):
+        pass
+
+
 def audit_standardized_docking(
     config: DockingConfig,
     *,
     exceptions_path: Path | None = None,
     check_artifacts: bool = False,
+    check_provenance: bool = False,
 ) -> DockingAuditReport:
     """Audit the authoritative screening manifest and standardized report.
 
@@ -243,6 +365,9 @@ def audit_standardized_docking(
             if not output.exists() or output.stat().st_size == 0:
                 errors.append(f"Missing or empty docking output PDBQT: {output}")
 
+    if check_provenance:
+        _audit_provenance(config, validated_ids, errors)
+
     if candidate_set_available and len(candidate_ids) != len(validated_ids) + len(exception_ids):
         errors.append(
             "Candidate partition count mismatch: "
@@ -294,6 +419,7 @@ def main() -> int:
         config,
         exceptions_path=args.exceptions,
         check_artifacts=args.check_artifacts,
+        check_provenance=args.check_provenance,
     )
 
     print("=" * 80)
