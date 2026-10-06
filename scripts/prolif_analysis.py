@@ -45,7 +45,7 @@ all_results = {}
 ligand_residues = {}
 
 for lid in LIGANDS:
-    sdf_path = f"{FIXED_DIR}/{lid}_fixed.sd"
+    sdf_path = f"{FIXED_DIR}/{lid}_fixed.sdf"
 
     if not os.path.exists(sdf_path):
         print(f"   SKIP {lid}: file not found")
