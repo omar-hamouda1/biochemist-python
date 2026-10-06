@@ -164,6 +164,32 @@ The authoritative docking report is:
 docking/results/standardized_affinities.csv
 ```
 
+### Receptor and ligand provenance
+
+Receptor preparation is deterministic and recorded by:
+
+```bash
+python -m scripts.prepare_receptor
+```
+
+It converts the PDB2PQR-prepared `pdb/protein_h.pdb` to the rigid receptor PDBQT using the documented Open Babel protocol.
+
+Ligand preparation is project-rooted and provenance-aware:
+
+```bash
+python -m scripts.prepare_ligands
+```
+
+Each generated PDBQT receives a local provenance sidecar. These sidecars are intentionally ignored by Git; the reviewable run-level record is generated after the full screening run:
+
+```bash
+python -m scripts.capture_environment
+python -m scripts.build_provenance_manifest
+python -m scripts.audit_docking --check-artifacts --check-provenance
+```
+
+The tracked `docking/results/standardized_provenance.json` records hashes for the configuration, source structures, preparation and docking code, tools, prepared ligands, docking poses, and validation environment.
+
 The standardized pose files are written under:
 
 ```text
