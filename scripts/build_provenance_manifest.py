@@ -6,6 +6,7 @@ import csv
 import importlib.metadata
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -185,7 +186,7 @@ def main() -> None:
             "smina": executable_version(config.smina_executable),
             "openbabel": executable_version("obabel"),
             "pdb2pqr": executable_version("pdb2pqr"),
-            "python": git_value("version") if False else __import__("sys").version.split()[0],
+            "python": sys.version.split()[0],
             "rdkit": package_version("rdkit"),
             "meeko": package_version("meeko"),
             "prolif": package_version("prolif"),
