@@ -58,10 +58,14 @@ jobs:
           python -c "
           import nbformat, glob, sys
           errors = 0
-          for nb_path in sorted(glob.glob('notebooks/*.ipynb')):
+          notebook_paths = sorted(glob.glob('notebooks/**/*.ipynb', recursive=True))
+          for nb_path in notebook_paths:
               try:
                   with open(nb_path) as f:
-                      nbformat.read(f, as_version=4)
+                      notebook = nbformat.read(f, as_version=4)
+                  for index, cell in enumerate(notebook.cells, start=1):
+                      if cell.cell_type == 'code':
+                          compile(''.join(cell.source), f'{nb_path}:cell-{index}', 'exec')
                   print(f'  OK: {nb_path}')
               except Exception as e:
                   print(f'  FAIL: {nb_path} — {e}')
