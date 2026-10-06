@@ -1,4 +1,4 @@
-"""Reproducibility metadata for the standardized docking workflow."""
+"""Provenance helpers for reproducible structure-preparation and docking steps."""
 
 from __future__ import annotations
 
@@ -29,81 +29,56 @@ def executable_version(executable: str) -> str:
         text=True,
         check=False,
     )
-    text = (result.stdout or result.stderr).strip()
-    return " ".join(text.split())
+    return " ".join((result.stdout or result.stderr).strip().split())
 
 
 def provenance_path(output_path: Path) -> Path:
-    """Return the sidecar path associated with a docking output."""
+    """Return the JSON sidecar path associated with an output artifact."""
     return output_path.with_name(f"{output_path.name}.provenance.json")
 
 
 def _fingerprint_payload(metadata: dict[str, Any]) -> dict[str, Any]:
+    """Return fields that define the computation independently of output bytes."""
     return {
-        key: metadata[key]
-        for key in (
-            "schema_version",
-            "config_sha256",
-            "receptor_sha256",
-            "ligand_pdbqt_sha256",
-            "runner_sha256",
-            "parser_sha256",
-            "smina_version",
-        )
+        "schema_version": metadata["schema_version"],
+        "source_sha256": metadata["source_sha256"],
+        "producer_sha256": metadata["producer_sha256"],
+        "tool_versions": metadata["tool_versions"],
+        "protocol": metadata["protocol"],
     }
 
 
 def build_fingerprint(metadata: dict[str, Any]) -> str:
-    """Build a stable fingerprint from all computation-defining inputs."""
-    payload = _fingerprint_payload(metadata)
+    """Build a stable computation fingerprint."""
     encoded = json.dumps(
-        payload,
+        _fingerprint_payload(metadata),
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
 
 
-def build_metadata(
+def build_artifact_metadata(
     *,
-    config_path: Path,
-    receptor_path: Path,
-    ligand_path: Path,
-    runner_path: Path,
-    parser_path: Path,
-    smina_version: str,
-    command: list[str],
+    source_path: Path,
+    producer_path: Path,
+    tool_versions: dict[str, str],
+    protocol: dict[str, Any],
 ) -> dict[str, Any]:
-    """Build computation-defining metadata for one docking run."""
+    """Build metadata for a derived structural artifact."""
     metadata: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        "config_sha256": sha256_file(config_path),
-        "receptor_sha256": sha256_file(receptor_path),
-        "ligand_pdbqt_sha256": sha256_file(ligand_path),
-        "runner_sha256": sha256_file(runner_path),
-        "parser_sha256": sha256_file(parser_path),
-        "smina_version": smina_version,
-        "command": command,
+        "source_sha256": sha256_file(source_path),
+        "producer_sha256": sha256_file(producer_path),
+        "tool_versions": dict(sorted(tool_versions.items())),
+        "protocol": protocol,
     }
     metadata["fingerprint"] = build_fingerprint(metadata)
     return metadata
 
 
-def write_metadata(path: Path, metadata: dict[str, Any], *, output_sha256: str, affinity: float) -> None:
-    """Write validated output metadata as a JSON sidecar."""
-    payload = {
-        **metadata,
-        "output_sha256": output_sha256,
-        "affinity": affinity,
-    }
-    path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-
-
 def load_metadata(path: Path) -> dict[str, Any] | None:
-    """Load a provenance sidecar, returning None when invalid or missing."""
+    """Load a valid JSON sidecar, returning None when missing or malformed."""
     if not path.exists() or path.stat().st_size == 0:
         return None
     try:
@@ -114,14 +89,34 @@ def load_metadata(path: Path) -> dict[str, Any] | None:
     return metadata if isinstance(metadata, dict) else None
 
 
-def validate_existing_output(
+def write_metadata(
+    path: Path,
+    metadata: dict[str, Any],
+    *,
+    output_path: Path,
+    affinity: float | None = None,
+) -> None:
+    """Write metadata including the exact output-file hash."""
+    payload = {
+        **metadata,
+        "output_sha256": sha256_file(output_path),
+    }
+    if affinity is not None:
+        payload["affinity"] = affinity
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "
+",
+        encoding="utf-8",
+    )
+
+
+def validate_existing_artifact(
     *,
     output_path: Path,
     metadata_path: Path,
     expected_metadata: dict[str, Any],
-    expected_affinity: float | None = None,
 ) -> bool:
-    """Return True only when output and provenance match current inputs."""
+    """Return True only when output bytes and computation fingerprint both match."""
     metadata = load_metadata(metadata_path)
     if metadata is None:
         return False
@@ -129,23 +124,34 @@ def validate_existing_output(
     if metadata.get("fingerprint") != expected_metadata.get("fingerprint"):
         return False
 
-    if metadata.get("output_sha256") != sha256_file(output_path):
+    return metadata.get("output_sha256") == sha256_file(output_path)
+
+
+def validate_existing_output(
+    *,
+    output_path: Path,
+    metadata_path: Path,
+    expected_metadata: dict[str, Any],
+    expected_affinity: float | None = None,
+) -> bool:
+    """Backward-compatible docking-output validation including affinity."""
+    if not validate_existing_artifact(
+        output_path=output_path,
+        metadata_path=metadata_path,
+        expected_metadata=expected_metadata,
+    ):
         return False
 
-    if expected_affinity is not None:
-        try:
-            if float(metadata.get("affinity")) != expected_affinity:
-                return False
-        except (TypeError, ValueError):
-            return False
-
-    return True
+    metadata = load_metadata(metadata_path)
+    if expected_affinity is None:
+        return True
+    try:
+        return float(metadata.get("affinity")) == expected_affinity
+    except (TypeError, ValueError):
+        return False
 
 
 def output_has_atoms(path: Path) -> bool:
     """Return True when a PDBQT contains at least one atom record."""
     with path.open(encoding="utf-8", errors="replace") as handle:
-        return any(
-            line.startswith(("ATOM", "HETATM"))
-            for line in handle
-        )
+        return any(line.startswith(("ATOM", "HETATM")) for line in handle)
