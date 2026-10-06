@@ -36,6 +36,14 @@ jobs:
         run: |
           pytest tests/ -v --tb=short
 
+      - name: Audit authoritative docking state
+        run: |
+          python -m scripts.audit_docking
+
+      - name: Compile project Python
+        run: |
+          python -m compileall -q src scripts tests
+
       - name: Lint source code
         run: |
           pip install flake8
