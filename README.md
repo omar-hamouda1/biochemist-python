@@ -370,7 +370,7 @@ These MD and MM-PBSA results are historical/reference-system results and should 
 
 ## 🧪 Testing and Validation
 
-The repository currently contains **28 automated tests**, all passing in the validated development environment:
+The repository currently contains **30 automated tests**, all passing in the validated development environment:
 
 ```bash
 pytest -q
@@ -379,7 +379,7 @@ pytest -q
 Current result:
 
 ```text
-28 passed
+30 passed
 ```
 
 The test suite covers:
