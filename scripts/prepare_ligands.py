@@ -205,12 +205,35 @@ def prepare_ligand(sdf_path: Path):
     }
 
 
+def load_validated_sdf_files() -> list[Path]:
+    """Return only SDF inputs listed in the authoritative validated manifest."""
+    config = load_docking_config()
+    with config.manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    ligand_ids = [row["ligand_id"].strip() for row in rows if row.get("ligand_id")]
+    if len(ligand_ids) != config.expected_ligands:
+        raise RuntimeError(
+            f"Expected {config.expected_ligands} validated ligands, found {len(ligand_ids)}"
+        )
+    if len(set(ligand_ids)) != len(ligand_ids):
+        raise RuntimeError("Validated ligand manifest contains duplicate IDs")
+
+    sdf_files = []
+    for ligand_id in ligand_ids:
+        sdf_path = LIGANDS_DIR / f"{ligand_id}.sdf"
+        if not sdf_path.exists():
+            raise FileNotFoundError(f"Validated ligand SDF not found: {sdf_path}")
+        sdf_files.append(sdf_path)
+    return sorted(sdf_files)
+
+
 def main() -> None:
-    """Prepare every SDF ligand using project-root paths."""
-    load_docking_config()
+    """Prepare only the authoritative validated ligand set."""
+    config = load_docking_config()
     PREPARED_DIR.mkdir(parents=True, exist_ok=True)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    sdf_files = sorted(LIGANDS_DIR.glob("*.sdf"))
+    sdf_files = load_validated_sdf_files()
 
     print("=" * 80)
     print("LIGAND PREPARATION")
