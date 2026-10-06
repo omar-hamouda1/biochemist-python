@@ -274,6 +274,7 @@ biochemist-python_ORGANIZED/
 │   ├── protein.py      # Protein structure utilities
 │   ├── admet.py        # Drug-likeness/property calculations
 │   ├── docking.py      # Standardized docking result parsing
+│   ├── docking_config.py# Validated docking configuration model
 │   └── visualization.py# 3D visualization helpers
 ├── scripts/            # Standalone analysis and pipeline scripts
 ├── tests/              # Unit tests (pytest)
