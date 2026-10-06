@@ -1,17 +1,58 @@
 from pathlib import Path
 import csv
 import subprocess
+import json
+import shutil
 
 from rdkit import Chem
 from meeko import MoleculePreparation, PDBQTWriterLegacy
+
+from src.provenance import executable_version, sha256_file
 
 
 LIGANDS_DIR = Path("ligands")
 PREPARED_DIR = Path("docking/ligands")
 RESULTS_DIR = Path("docking/results")
+SCRIPT_PATH = Path(__file__).resolve()
 
 PREPARED_DIR.mkdir(parents=True, exist_ok=True)
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def preparation_sidecar(path: Path) -> Path:
+    return path.with_name(f"{path.name}.provenance.json")
+
+
+def current_preparation_metadata(sdf_path: Path) -> dict[str, str]:
+    return {
+        "schema_version": "1",
+        "sdf_sha256": sha256_file(sdf_path),
+        "preparation_script_sha256": sha256_file(SCRIPT_PATH),
+        "openbabel_version": (
+            executable_version("obabel") if shutil.which("obabel") else "unavailable"
+        ),
+        "rdkit_version": __import__("rdkit").__version__,
+        "meeko_version": __import__("meeko").__version__,
+    }
+
+
+def valid_existing_preparation(sdf_path: Path, pdbqt_path: Path) -> bool:
+    sidecar = preparation_sidecar(pdbqt_path)
+    if not is_valid_pdbqt(pdbqt_path) or not sidecar.exists():
+        return False
+    try:
+        metadata = json.loads(sidecar.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return metadata == current_preparation_metadata(sdf_path)
+
+
+def write_preparation_sidecar(sdf_path: Path, pdbqt_path: Path) -> None:
+    sidecar = preparation_sidecar(pdbqt_path)
+    sidecar.write_text(
+        json.dumps(current_preparation_metadata(sdf_path), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def is_valid_pdbqt(path: Path) -> bool:
@@ -102,7 +143,7 @@ def prepare_ligand(sdf_path: Path):
     ligand_id = sdf_path.stem
     output_path = PREPARED_DIR / f"{ligand_id}.pdbqt"
 
-    if is_valid_pdbqt(output_path):
+    if valid_existing_preparation(sdf_path, output_path):
         return {
             "ligand_id": ligand_id,
             "status": "already_valid",
@@ -117,6 +158,7 @@ def prepare_ligand(sdf_path: Path):
     ok, message = run_openbabel(sdf_path, output_path)
 
     if ok:
+        write_preparation_sidecar(sdf_path, output_path)
         return {
             "ligand_id": ligand_id,
             "status": "prepared",
@@ -130,6 +172,7 @@ def prepare_ligand(sdf_path: Path):
     ok, message = run_meeko(sdf_path, output_path)
 
     if ok:
+        write_preparation_sidecar(sdf_path, output_path)
         return {
             "ligand_id": ligand_id,
             "status": "prepared",
