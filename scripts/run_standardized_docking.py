@@ -49,7 +49,7 @@ def parse_affinity(path: Path) -> float | None:
     """Return the first affinity recorded in a Smina output file."""
 
     affinities = parse_smina_output(str(path))
-    return affinities[0] if affinities else None
+    return affinities[0] if len(affinities) == 1 else None
 
 
 def load_ligands(config: DockingConfig) -> list[str]:
