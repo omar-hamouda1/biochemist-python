@@ -119,3 +119,35 @@ def test_smina_command_uses_config_values():
     assert command[command.index("--exhaustiveness") + 1] == "4"
     assert command[command.index("--num_modes") + 1] == "1"
     assert command[command.index("--seed") + 1] == "42"
+
+
+def test_rejects_non_integral_seed(tmp_path):
+    config_file = tmp_path / "configs" / "docking_config.yml"
+    config_file.parent.mkdir()
+    config_file.write_text(
+        "\n".join(
+            [
+                "target_pdb: TEST",
+                "reference_ligand: REF",
+                "center_x: 1",
+                "center_y: 2",
+                "center_z: 3",
+                "size_x: 10",
+                "size_y: 10",
+                "size_z: 10",
+                "exhaustiveness: 2",
+                "num_modes: 1",
+                "seed: 7.5",
+                "timeout_seconds: 60",
+                "expected_ligands: 1",
+                "receptor: receptor.pdbqt",
+                "ligand_dir: ligands",
+                "manifest: manifest.csv",
+                "output_dir: results",
+                "report: report.csv",
+            ]
+        )
+    )
+
+    with pytest.raises(DockingConfigError, match="seed must be an integer"):
+        load_docking_config(config_file)
