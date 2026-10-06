@@ -1,7 +1,6 @@
 # 🔬 Pipeline Architecture — Detailed Walkthrough
 
-This document explains the full computational drug discovery pipeline
-implemented in this project. Each stage maps to one or more Jupyter notebooks.
+This document explains the computational drug-discovery workflow implemented in this project. Each stage maps to one or more Jupyter notebooks, reusable modules, and/or standalone scripts.
 
 ---
 
@@ -23,14 +22,15 @@ Stage 1: Foundations          Stage 2: Structure          Stage 3: Discovery
  NB: 01-08                    NB: 09-11                   NB: 12-13
                                                               │
                                                               ▼
-Stage 6: Analysis            Stage 5: ADMET             Stage 4: Docking
+Stage 6: Analysis            Stage 5: Properties         Stage 4: Docking
 ┌──────────────────┐         ┌──────────────────┐       ┌──────────────────┐
-│ MD Trajectory    │         │ Lipinski Ro5     │       │ AutoDock Vina    │
-│ RMSD / RMSF      │◀────────│ Druglikeness     │◀──────│ Virtual Screen   │
-│ MMPBSA           │         │ ADMET Filters    │       │ 117 ligands      │
-│ ProLIF Heatmap   │         │                  │       │ Ranked by ΔG     │
-└──────────────────┘         └──────────────────┘       └──────────────────┘
- NB: 16                       NB: 15                      NB: 14
+│ MD Trajectory    │         │ Lipinski / Veber │       │ Standardized     │
+│ RMSD / RMSF      │◀────────│ Drug-likeness    │◀──────│ Smina            │
+│ MM/PBSA          │         │ PAINS Filtering  │       │ Virtual Screen   │
+│ ProLIF Analysis  │         │ RDKit Descriptors│       │ 111 ligands      │
+└──────────────────┘         └──────────────────┘       │ Ranked by score  │
+ NB: 16                       NB: 15                    └──────────────────┘
+                                                               NB: 14
 ```
 
 ---
@@ -39,7 +39,7 @@ Stage 6: Analysis            Stage 5: ADMET             Stage 4: Docking
 
 ### What You Learn
 
-* Python syntax, variables, loops, functions, conditionals
+* Python syntax, variables, loops, functions, and conditionals
 * File I/O: reading CSV and PDB files
 * Processing multiple files with `glob` and `os`
 * Data manipulation with `pandas`
@@ -67,14 +67,14 @@ Stage 6: Analysis            Stage 5: ADMET             Stage 4: Docking
 ### What You Learn
 
 * Parsing mmCIF files with Biopython
-* Querying the RCSB PDB via REST API
+* Querying the RCSB PDB
 * 3D structure visualization with ICN3D and py3Dmol
 * Understanding resolution, R-factor, and structure quality
 
 ### Key Data
 
-* **Myoglobin structures**: 40+ CIF files in `pdb_files/`
-* **Target protein**: Trypsin (2ZQ2) — 1.7 Å resolution
+* **Myoglobin structures:** 40+ CIF files in `pdb_files/`
+* **Target protein:** Trypsin (2ZQ2) — 1.7 Å resolution
 
 ---
 
@@ -84,42 +84,93 @@ Stage 6: Analysis            Stage 5: ADMET             Stage 4: Docking
 
 * Searching PDB by EC classification (EC 3.4.21 → Serine Proteases)
 * Extracting bound ligands from crystal structures
-* Building a screening library (117 unique ligands)
-* Binding site identification and visualization
+* Building a screening library of 117 ligand SDF files
+* Binding-site identification and visualization
 * Understanding protein-ligand interactions
 
 ### Output
 
-* `ligands/` directory: 117 SDF files
+* `ligands/` directory: 117 ligand SDF files
 * Standardized screening set: 111 validated ligands
-* Binding site residue list
+* Binding-site residue information
 * Reference ligand (13U) interaction profile
 
 ---
 
-## Stage 4: Virtual Screening (Notebook 14)
+## Stage 4: Standardized Virtual Screening
 
 ### What You Learn
 
 * Receptor preparation (PDB → PDBQT)
 * Ligand preparation (SDF → PDBQT)
-* Docking box definition (centered on binding site)
-* Running AutoDock Vina / Smina
-* Parsing and ranking results
+* Docking-box definition
+* Running standardized Smina docking
+* Parsing and ranking docking results
+* Distinguishing current authoritative results from historical recovery outputs
+
+### Authoritative Workflow
+
+The current standardized screening is implemented by:
+
+```text
+scripts/run_standardized_docking.py
+```
+
+The authoritative runtime configuration is:
+
+```text
+configs/docking_config.yml
+```
+
+The docking script loads and validates this YAML at runtime; production docking parameters and paths are not duplicated as independent constants in the script.
+
+Run the authoritative workflow from the repository root as:
+
+```bash
+python -m scripts.run_standardized_docking
+```
+
+The companion audit for the authoritative report is:
+
+```bash
+python -m scripts.audit_docking
+```
+
+Use `--check-artifacts` with the audit when generated receptor, ligand, and docking PDBQT files are available locally.
+
+The validated ligand manifest is:
+
+```text
+docking/results/validated_ligands_111.csv
+```
 
 ### Configuration
 
 ```text
-Box center: (17.672, -8.256, 10.688) Å
-Box size: 25.0 × 25.0 × 25.0 Å
+Receptor:  docking/receptor/2zq2_receptor.pdbqt
+Center:    (17.672, -8.256, 10.688) Å
+Box size:  25.0 × 25.0 × 25.0 Å
+Tool:      Smina
 Exhaustiveness: 4
 Number of modes: 1
 Random seed: 42
 ```
 
-The standardized screening run used Smina with the fixed configuration above
-for the validated 111-ligand set. The resulting report is stored in
-`docking/results/standardized_affinities.csv`.
+The standardized run is defined for the validated 111-ligand set. The expected ligand count, manifest, report path, timeout, and Smina executable are controlled by `configs/docking_config.yml`.
+
+The authoritative docking report is:
+
+```text
+docking/results/standardized_affinities.csv
+```
+
+The standardized pose files are written under:
+
+```text
+docking/results/standardized/
+```
+
+Historical recovery-stage affinity files are retained separately and are not used as the current docking ranking.
 
 ### Current Top 5 Results
 
@@ -131,18 +182,37 @@ for the validated 111-ligand set. The resulting report is stored in
 | 4    | 12U    | -9.374041           |
 | 5    | T87    | -9.270527           |
 
+These are computational docking scores used for ranking and should not be interpreted as experimental binding affinities.
+
 ---
 
-## Stage 5: ADMET Prediction (Notebook 15)
+## Stage 5: Rule-Based Drug-Likeness and Molecular Properties (Notebook 15 + ADMET script)
 
 ### What You Learn
 
 * Lipinski's Rule of Five
-* Molecular descriptors (MW, LogP, HBD, HBA)
-* Drug-likeness assessment
-* Filtering hits by ADMET properties
-* RDKit descriptor-based and rule-based screening
-  (not full ADME/toxicity prediction)
+* Molecular descriptors such as MW, LogP, HBD, HBA, TPSA, and RotB
+* Veber-rule assessment
+* PAINS filtering
+* Rule-based drug-likeness assessment
+* RDKit descriptor-based screening
+
+The current workflow uses RDKit descriptors and rule-based filters. It is not a full ADME or toxicity prediction system.
+
+The current Top 5 summary is stored under:
+
+```text
+docking/results/admet/
+```
+
+The authoritative current files include:
+
+```text
+docking/results/admet/admet_summary.csv
+docking/results/admet/admet_top5.csv
+```
+
+Notebook 15 is retained as educational analysis material and should not be treated as a separate authoritative ranking pipeline.
 
 ---
 
@@ -153,14 +223,14 @@ for the validated 111-ligand set. The resulting report is stored in
 * System preparation (protein + ligand + solvent + ions)
 * Energy minimization
 * NVT and NPT equilibration
-* Production MD run
+* Production MD
 * Trajectory analysis (RMSD, RMSF, hydrogen bonds)
-* MMPBSA binding free energy decomposition
-* ProLIF interaction fingerprint heatmaps
+* MM/PBSA binding-energy decomposition
+* ProLIF interaction analysis
 
-The MD analysis currently documented in this repository is based on the
-historical 13U–Trypsin reference-ligand system. It is not a claim that the
-current docking top hit R11 has been experimentally or MD validated.
+The MD analysis documented in this repository is based on the historical Trypsin–13U reference-ligand system.
+
+The MD results provide computational evidence about the behavior of 13U in that simulated complex. They do not experimentally validate the current docking ranking, and they do not constitute MD validation of the current top-ranked ligand R11.
 
 ### Software
 
@@ -170,27 +240,52 @@ current docking top hit R11 has been experimentally or MD validated.
 
 ---
 
+## Current Results and Reproducibility
+
+### Validated Screening Set
+
+The project starts from 117 candidate ligands.
+
+After validation and resolution checks:
+
+* 111 unique ligands are included in the standardized docking set.
+* 6 ligands remain unresolved: `0ZW`, `0ZX`, `0ZY`, `PPB`, `BAZ`, and `BOZ`.
+
+### Authoritative Current Outputs
+
+| Purpose                      | File                                          |
+| ---------------------------- | --------------------------------------------- |
+| Validated ligand manifest    | `docking/results/validated_ligands_111.csv`   |
+| Standardized docking report  | `docking/results/standardized_affinities.csv` |
+| ProLIF Top 5 summary         | `docking/results/prolif_summary.csv`          |
+| Molecular-property Top 5 summary | `docking/results/admet/admet_top5.csv`        |
+| Merged Top-hit summary       | `results/top_hits_summary.csv`                |
+
+For the current results, prefer the authoritative files listed above.
+
+---
+
 ## Directory Map
 
 ```text
 biochemist-python_ORGANIZED/
-├── notebooks/          # 16 Jupyter notebooks (main pipeline)
+├── notebooks/          # 16 educational/analysis notebooks
 ├── src/                # Reusable Python modules
-│   ├── protein.py      #   Protein structure utilities
-│   ├── admet.py        #   ADMET/Lipinski calculations
-│   ├── docking.py      #   Docking result parsing
-│   └── visualization.py#   3D visualization helpers
-├── scripts/            # Standalone analysis scripts
+│   ├── protein.py      # Protein structure utilities
+│   ├── admet.py        # Drug-likeness/property calculations
+│   ├── docking.py      # Standardized docking result parsing
+│   └── visualization.py# 3D visualization helpers
+├── scripts/            # Standalone analysis and pipeline scripts
 ├── tests/              # Unit tests (pytest)
-├── data/               # Raw experimental data (CSV)
+├── data/               # Educational/reference data
 ├── pdb/                # Protein structure files
 ├── pdb_files/          # Myoglobin CIF collection
 ├── ligands/            # 117 ligand SDF files
-├── docking/            # Docking inputs and outputs
-├── md/                 # MD simulation files
-├── figures/            # Generated publication figures
-├── results/            # Final merged results
+├── docking/            # Docking inputs and results
+├── md/                 # MD simulation files and analysis
+├── figures/            # Generated figures
+├── results/            # Final merged result summaries
 ├── configs/            # Configuration files
-├── molssi_data/        # MolSSI workshop reference
-└── docs/               # Documentation
+├── molssi_data/        # MolSSI workshop reference material
+└── docs/               # Project documentation
 ```

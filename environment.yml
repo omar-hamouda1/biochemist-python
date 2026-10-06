@@ -21,6 +21,7 @@ dependencies:
   - pip
   - pytest
   - pytest-cov
+  - pyyaml>=6.0
   - flake8
   - pip:
     - prolif>=2.0.0

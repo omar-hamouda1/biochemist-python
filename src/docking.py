@@ -1,28 +1,21 @@
 """
-docking.py — Utilities for molecular docking with AutoDock Vina / Smina.
+docking.py — Utilities for standardized molecular docking with Smina.
 
-This module provides helper functions to prepare, run, and parse
-docking results for the virtual screening pipeline.
-
-Example
--------
->>> from src.docking import parse_vina_output, get_top_hits
->>> affinities = parse_vina_output("docking/results/13U_out.pdbqt")
->>> print(f"Best affinity: {affinities[0]:.2f} kcal/mol")
+This module provides helper functions to parse standardized Smina docking
+outputs and rank docking results for the virtual screening pipeline.
 """
 
-import re
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 import pandas as pd
 
 
-def parse_vina_output(pdbqt_path: str) -> List[float]:
-    """Parse AutoDock Vina PDBQT output and extract binding affinities.
+def parse_smina_output(pdbqt_path: str) -> List[float]:
+    """Parse standardized Smina PDBQT output.
 
-    Reads the ``REMARK VINA RESULT`` lines from a docked PDBQT file
-    and returns a list of affinities (kcal/mol) for each pose.
+    Reads ``REMARK minimizedAffinity`` lines from a docked PDBQT file
+    and returns the reported docking affinity scores (kcal/mol).
 
     Parameters
     ----------
@@ -32,14 +25,10 @@ def parse_vina_output(pdbqt_path: str) -> List[float]:
     Returns
     -------
     list of float
-        Binding affinities in kcal/mol (negative = better binding).
-        Empty list if file is empty or cannot be parsed.
-
-    Example
-    -------
-    >>> affinities = parse_vina_output("docking/results/13U_out.pdbqt")
-    >>> print(f"Best pose: {affinities[0]:.1f} kcal/mol")
-    Best pose: -9.5 kcal/mol
+        Docking affinity scores in kcal/mol, with more negative values
+        representing better predicted docking scores.
+        Returns an empty list if the file is missing, empty, or cannot
+        be parsed.
     """
     affinities = []
     path = Path(pdbqt_path)
@@ -47,82 +36,54 @@ def parse_vina_output(pdbqt_path: str) -> List[float]:
     if not path.exists() or path.stat().st_size == 0:
         return affinities
 
-    with open(path, "r") as f:
-        for line in f:
-            if line.startswith("REMARK VINA RESULT"):
+    with path.open() as handle:
+        for line in handle:
+            if line.startswith("REMARK minimizedAffinity"):
                 parts = line.strip().split()
-                if len(parts) >= 4:
+                if len(parts) >= 3:
                     try:
-                        affinities.append(float(parts[3]))
+                        affinities.append(float(parts[2]))
                     except ValueError:
                         continue
+
     return affinities
 
 
-def load_affinities(csv_path: str = "docking/results/affinities_full.csv") -> pd.DataFrame:
-    """Load the full docking affinities CSV.
+def load_affinities(
+    csv_path: str = "docking/results/standardized_affinities.csv",
+) -> pd.DataFrame:
+    """Load the standardized docking affinity report.
 
     Parameters
     ----------
     csv_path : str
-        Path to the affinities CSV file.
+        Path to the standardized docking CSV report.
 
     Returns
     -------
-    pd.DataFrame
-        DataFrame with columns: ``rank``, ``ligand_id``, ``affinity``.
+    pandas.DataFrame
+        DataFrame containing the standardized docking results.
     """
     return pd.read_csv(csv_path)
 
 
 def get_top_hits(
-    csv_path: str = "docking/results/affinities_full.csv",
+    csv_path: str = "docking/results/standardized_affinities.csv",
     n: int = 10,
 ) -> pd.DataFrame:
-    """Return the top N hits ranked by binding affinity.
+    """Return the top N ligands ranked by docking affinity.
 
     Parameters
     ----------
     csv_path : str
-        Path to the affinities CSV file.
+        Path to the standardized docking CSV report.
     n : int, default 10
         Number of top hits to return.
 
     Returns
     -------
-    pd.DataFrame
-        Top N rows sorted by affinity (most negative first).
+    pandas.DataFrame
+        Top N rows sorted by affinity, with the most negative score first.
     """
     df = load_affinities(csv_path)
     return df.sort_values("affinity").head(n)
-
-
-def read_box_config(config_path: str = "docking/box_config.txt") -> Dict[str, float]:
-    """Read docking box configuration from a text file.
-
-    Parameters
-    ----------
-    config_path : str
-        Path to the box configuration file.
-
-    Returns
-    -------
-    dict
-        Dictionary with keys: ``center_x``, ``center_y``, ``center_z``,
-        ``size_x``, ``size_y``, ``size_z``.
-
-    Example
-    -------
-    >>> box = read_box_config()
-    >>> print(f"Center: ({box['center_x']}, {box['center_y']}, {box['center_z']})")
-    """
-    config = {}
-    with open(config_path, "r") as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith("#") or not line:
-                continue
-            match = re.match(r"(\w+)\s*=\s*([\d.\-]+)", line)
-            if match:
-                config[match.group(1)] = float(match.group(2))
-    return config
