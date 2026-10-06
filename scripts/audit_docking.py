@@ -117,7 +117,6 @@ def _audit_report_csv(
     return _sorted_unique(report_ids_raw)
 
 
-
 def _audit_provenance(
     config: DockingConfig,
     validated_ids: Iterable[str],
