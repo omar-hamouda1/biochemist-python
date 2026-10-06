@@ -9,6 +9,7 @@ import subprocess
 from pathlib import Path
 
 import meeko
+import rdkit
 from rdkit import Chem
 
 from src.docking_config import load_docking_config
@@ -41,7 +42,7 @@ def current_preparation_metadata(sdf_path: Path, method: str) -> dict:
     config = load_docking_config()
     tool_versions = {
         "openbabel": executable_version("obabel"),
-        "rdkit": Chem.__version__ if hasattr(Chem, "__version__") else "unknown",
+        "rdkit": rdkit.__version__,
         "meeko": meeko.__version__,
     }
     protocol = {
