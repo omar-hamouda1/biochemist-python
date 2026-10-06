@@ -206,7 +206,7 @@ print("Preparing standardized Top 5 for ProLIF...\n")
 
 for lid in top_5:
     pdbqt = f"{POSE_DIR}/{lid}_out.pdbqt"
-    output = f"{OUTPUT_DIR}/{lid}_fixed.sd"
+    output = f"{OUTPUT_DIR}/{lid}_fixed.sdf"
 
     if not os.path.exists(pdbqt):
         print(f"  FAIL {lid:5s} — standardized pose not found")
