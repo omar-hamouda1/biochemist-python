@@ -12,7 +12,6 @@ from typing import Iterable
 from src.docking import parse_smina_output
 from src.docking_config import DockingConfig, load_docking_config
 from src.provenance import (
-    build_artifact_metadata,
     build_metadata,
     executable_version,
     load_metadata,
@@ -170,12 +169,17 @@ def _audit_provenance(
                 config.report.parents[2] / "ligands" / f"{ligand_id}.sdf"
             ):
                 errors.append(f"{ligand_id}: ligand source hash mismatch")
-            if ligand_meta.get("output_sha256") != sha256_file(ligand):
+            if not ligand.exists():
+                errors.append(f"{ligand_id}: prepared ligand missing")
+            elif ligand_meta.get("output_sha256") != sha256_file(ligand):
                 errors.append(f"{ligand_id}: prepared ligand hash mismatch")
 
         output_meta = load_metadata(provenance_path(output))
         if output_meta is None:
             errors.append(f"{ligand_id}: missing docking provenance")
+            continue
+        if not output.exists():
+            errors.append(f"{ligand_id}: docking output missing")
             continue
 
         affinities = parse_smina_output(str(output))
