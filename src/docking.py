@@ -5,9 +5,8 @@ This module provides helper functions to parse standardized Smina docking
 outputs and rank docking results for the virtual screening pipeline.
 """
 
-import re
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
 import pandas as pd
 
