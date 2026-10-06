@@ -54,10 +54,13 @@ jobs:
 
       - name: Validate notebook JSON
         run: |
-          pip install nbformat
+          pip install nbformat ipython
           python -c "
-          import nbformat, glob, sys
+          import glob, sys
+          import nbformat
+          from IPython.core.inputtransformer2 import TransformerManager
           errors = 0
+          transformer = TransformerManager()
           notebook_paths = sorted(glob.glob('notebooks/**/*.ipynb', recursive=True))
           for nb_path in notebook_paths:
               try:
@@ -65,7 +68,9 @@ jobs:
                       notebook = nbformat.read(f, as_version=4)
                   for index, cell in enumerate(notebook.cells, start=1):
                       if cell.cell_type == 'code':
-                          compile(''.join(cell.source), f'{nb_path}:cell-{index}', 'exec')
+                          source = ''.join(cell.source)
+                          transformed = transformer.transform_cell(source)
+                          compile(transformed, f'{nb_path}:cell-{index}', 'exec')
                   print(f'  OK: {nb_path}')
               except Exception as e:
                   print(f'  FAIL: {nb_path} — {e}')
