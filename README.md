@@ -122,7 +122,7 @@ Activate the environment defined by your local `environment.yml`.
 For the development environment used during validation of this project:
 
 ```bash
-conda activate biochem-vscode
+conda activate biochem
 ```
 
 ### 3. Launch JupyterLab
