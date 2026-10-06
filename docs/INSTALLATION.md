@@ -50,7 +50,7 @@ This environment includes the main dependencies used by the project:
 
 * **Core:** Python 3.11, NumPy, Pandas, SciPy, Matplotlib, Seaborn
 * **Structure:** Biopython, MDAnalysis
-* **Cheminformatics:** RDKit, Open Babel, RCSB search tools
+* **Cheminformatics:** RDKit, Open Babel, rcsb-api
 * **Docking:** Smina, Meeko
 * **Simulation:** OpenMM
 * **Visualization:** NGLView, py3Dmol
