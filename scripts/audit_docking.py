@@ -404,19 +404,27 @@ def main() -> int:
         default=None,
         help="Path to docking_config.yml (default: project config)",
     )
+
     parser.add_argument(
         "--exceptions",
         type=Path,
         default=None,
         help="Path to docking_exceptions.csv (default: beside the report)",
     )
+
     parser.add_argument(
         "--check-artifacts",
         action="store_true",
         help="Also check generated receptor, ligand, and docking PDBQT files.",
     )
-    args = parser.parse_args()
 
+    parser.add_argument(
+        "--check-provenance",
+        action="store_true",
+        help="Also validate provenance manifests and docking sidecars.",
+    )
+
+    args = parser.parse_args()
     config = load_docking_config(args.config) if args.config else load_docking_config()
     audit = audit_standardized_docking(
         config,
