@@ -2,7 +2,7 @@
   "authoritative_files": {
     "standardized_report": {
       "path": "docking/results/standardized_affinities.csv",
-      "sha256": "80fc1d05b2cf76de9941aeca2f0c996b438d2934c81b73ebf4a28dc3621f3d11"
+      "sha256": "4613c5777d2d9cf9115c4e02452d11956ae82c3f322fd2a3ace6e78bbea063a2"
     },
     "validated_manifest": {
       "path": "docking/results/validated_ligands_111.csv",
@@ -13,66 +13,66 @@
     "path": "configs/docking_config.yml",
     "sha256": "a98ca67bea80033eed7f881ad696ff3d850da4c9eba5de50cb9afdc32bb85700"
   },
-  "created_utc": "2026-10-06T23:16:51.569904+00:00",
+  "created_utc": "2026-10-07T07:41:53.746970+00:00",
   "docking_outputs": [
     {
-      "affinity": -9.51114082,
+      "affinity": -9.43803596,
       "docking_fingerprint": "fe81e63811fa174aad4b3c99bcd2d3c8bfd3bda1cbd8e3b97b32288ef3ce5805",
       "ligand_id": "13U",
       "output_pdbqt_sha256": "65b1c4d454da8093e76dab1c8aaa56ab1cd2f5974f4f68e02864eefbb8254c4e",
       "recorded_output_sha256": "65b1c4d454da8093e76dab1c8aaa56ab1cd2f5974f4f68e02864eefbb8254c4e"
     },
     {
-      "affinity": -9.7876091,
+      "affinity": -9.83414936,
       "docking_fingerprint": "91219a6f3c9ca2763effbf86c4a51262176b128c9a7ab371dd33428082d4b0dd",
       "ligand_id": "R11",
       "output_pdbqt_sha256": "25f464a551e7847ed3569226adb68cfc6a7d6d7f077391cd94ebef595122719d",
       "recorded_output_sha256": "25f464a551e7847ed3569226adb68cfc6a7d6d7f077391cd94ebef595122719d"
     },
     {
-      "affinity": -9.41380882,
+      "affinity": -9.42084408,
       "docking_fingerprint": "1872b0ce13d6e88fd616f4ec2da8dabc77af71be0d943303606ffcbff0e796f0",
       "ligand_id": "BAH",
       "output_pdbqt_sha256": "3011306c10239814bf96116d60024cd4cd6f0be3dcab9cb150260c10e549c65d",
       "recorded_output_sha256": "3011306c10239814bf96116d60024cd4cd6f0be3dcab9cb150260c10e549c65d"
     },
     {
-      "affinity": -9.2651825,
+      "affinity": -9.33216953,
       "docking_fingerprint": "16f9d45a65ef4c1a76cf3d3f79fac535c335d951a214856b97bbabbaa952fd75",
       "ligand_id": "607",
       "output_pdbqt_sha256": "8a147bd989dbd42771433a88dda253043553c82672b5ab7fa42b8523dc60c9e8",
       "recorded_output_sha256": "8a147bd989dbd42771433a88dda253043553c82672b5ab7fa42b8523dc60c9e8"
     },
     {
-      "affinity": -9.3740406,
+      "affinity": -9.33996773,
       "docking_fingerprint": "90e7f81f3a2c81602fb2c7d0bcc7ddd8f383cbf8ef467478548165e78d1112c4",
       "ligand_id": "12U",
       "output_pdbqt_sha256": "eb9e60f67182265581338fb6fd65949bbc11b0f4feb18bad511a229c0bad274b",
       "recorded_output_sha256": "eb9e60f67182265581338fb6fd65949bbc11b0f4feb18bad511a229c0bad274b"
     },
     {
-      "affinity": -9.15939617,
+      "affinity": -9.09339714,
       "docking_fingerprint": "84daf0d17073ef57116824c0179d0c1883c31290e1a10c35ddc374a99001ba7b",
       "ligand_id": "693",
       "output_pdbqt_sha256": "04b9fdd38f8f983491bcb3d9203630fe596edb3d7be3344090664ec5ae67325e",
       "recorded_output_sha256": "04b9fdd38f8f983491bcb3d9203630fe596edb3d7be3344090664ec5ae67325e"
     },
     {
-      "affinity": -9.07495594,
+      "affinity": -9.11743641,
       "docking_fingerprint": "01d7f01c23d11719dccfd954b7e12432ef580ace2ccada482baf8050360f605c",
       "ligand_id": "653",
       "output_pdbqt_sha256": "1605f4fabc894401c79d7f5ba43a5e49dbb50f4df87a1a33c293e4f049984dea",
       "recorded_output_sha256": "1605f4fabc894401c79d7f5ba43a5e49dbb50f4df87a1a33c293e4f049984dea"
     },
     {
-      "affinity": -9.08697701,
+      "affinity": -9.04267406,
       "docking_fingerprint": "de22e7db4e4c045523ebae94505455a9e38844e557921be7704e88997061c4af",
       "ligand_id": "BZY",
       "output_pdbqt_sha256": "b1df29489dd23b3b9b232dc0fc095f30de86e334dcfe596192bb3c4407fddb9b",
       "recorded_output_sha256": "b1df29489dd23b3b9b232dc0fc095f30de86e334dcfe596192bb3c4407fddb9b"
     },
     {
-      "affinity": -9.19957352,
+      "affinity": -9.14807224,
       "docking_fingerprint": "e9d217e5c1bf39d3665c6a751d19d491a4bd9ca540e12c98cd59b348d86de6ec",
       "ligand_id": "32U",
       "output_pdbqt_sha256": "d9880964cd7bf826e3a2d7ffe09087a992cbe8cd6abd38ec09b5cf4e2cdf197c",
@@ -797,7 +797,7 @@
     "path": "docking/results/standardized_environment.txt",
     "sha256": null
   },
-  "git_commit_at_generation": "03841aaefd6636d27f2654cff8c13d06a778bd1a",
+  "git_commit_at_generation": "a74c3e440c957caa2ebb5d48d144abf392a31bab",
   "pipeline_code": {
     "ligand_preparer_sha256": "3fb6b724ec01c9e82aff9a431f878bce3a69aef73adcb674abdcf4c7a05374aa",
     "parser_sha256": "365f33fad2c0083115b3068ce005bd0564a57df7d6a7450013b7558ebb7271dd",

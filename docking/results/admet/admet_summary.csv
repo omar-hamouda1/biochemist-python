@@ -1,6 +1,6 @@
 rank,ligand_id,affinity,MW,LogP,HBD,HBA,TPSA,RotB,Rings,Aromatic_Rings,Heavy_Atoms,Fraction_Csp3,Mol_Refract,Formal_Charge,Lipinski_Violations,Lipinski_Verdict,Veber_Violations,Veber_Verdict,PAINS_Alerts,PAINS_Verdict,PAINS_Details,source_pose
-1,R11,-9.7876091,402.36,1.24,3,6,97.54,6,5,5,32,0.0,108.82,0,0,Excellent,0,Pass,0,Clean,,docking/results/fixed/R11_fixed.sd
-2,13U,-9.51114082,383.33,-1.01,4,4,111.31,7,3,1,30,0.0,95.43,0,0,Excellent,0,Pass,0,Clean,,docking/results/fixed/13U_fixed.sd
-3,BAH,-9.41380882,366.38,-3.45,8,4,201.04,6,4,4,27,0.059,97.85,2,1,Acceptable,1,Fail,0,Clean,,docking/results/fixed/BAH_fixed.sd
-4,12U,-9.3740406,371.32,-1.09,4,4,111.31,7,3,1,29,0.0,92.19,0,0,Excellent,0,Pass,0,Clean,,docking/results/fixed/12U_fixed.sd
-5,T87,-9.27052689,498.4,0.89,2,9,138.28,11,5,4,39,0.034,124.86,0,0,Excellent,1,Fail,0,Clean,,docking/results/fixed/T87_fixed.sd
+1,R11,-9.83414936,402.36,1.24,3,6,97.54,6,5,5,32,0.0,108.82,0,0,Excellent,0,Pass,0,Clean,,docking/results/fixed/R11_fixed.sd
+2,13U,-9.43803596,383.33,-1.01,4,4,111.31,7,3,1,30,0.0,95.43,0,0,Excellent,0,Pass,0,Clean,,docking/results/fixed/13U_fixed.sd
+3,BAH,-9.42084408,366.38,-3.45,8,4,201.04,6,4,4,27,0.059,97.85,2,1,Acceptable,1,Fail,0,Clean,,docking/results/fixed/BAH_fixed.sd
+4,12U,-9.33996773,371.32,-1.09,4,4,111.31,7,3,1,29,0.0,92.19,0,0,Excellent,0,Pass,0,Clean,,docking/results/fixed/12U_fixed.sd
+5,607,-9.33216953,457.45,-2.01,4,7,209.63,8,4,4,34,0.083,118.42,-2,0,Excellent,1,Fail,0,Clean,,docking/results/fixed/607_fixed.sd
