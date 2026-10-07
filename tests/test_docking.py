@@ -59,7 +59,7 @@ class TestGetTopHits:
             "13U",
             "BAH",
             "12U",
-            "T87",
+            "607",
         ]
 
 
