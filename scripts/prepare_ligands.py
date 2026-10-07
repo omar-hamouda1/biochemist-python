@@ -230,7 +230,6 @@ def load_validated_sdf_files() -> list[Path]:
 
 def main() -> None:
     """Prepare only the authoritative validated ligand set."""
-    config = load_docking_config()
     PREPARED_DIR.mkdir(parents=True, exist_ok=True)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     sdf_files = load_validated_sdf_files()
