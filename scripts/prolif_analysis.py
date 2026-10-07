@@ -52,7 +52,7 @@ def main():
 
     missing_fixed = [
         lid for lid in ligands
-        if not (fixed_dir / f"{lid}_fixed.sd").exists()
+        if not (fixed_dir / f"{lid}_fixed.sdf").exists()
     ]
     if missing_fixed:
         raise RuntimeError(
