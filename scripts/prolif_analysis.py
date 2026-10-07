@@ -29,7 +29,7 @@ def load_top_hits(report_path: Path):
     ranking = ranking[
         ranking["status"].isin(["ok", "existing"])
     ].dropna(subset=["affinity"])
-    ranking = ranking.sort_values("affinity").reset_index(drop=True)
+    ranking = ranking.sort_values(["affinity", "ligand_id"], kind="mergesort").reset_index(drop=True)
 
     top = ranking.head(TOP_N)
     if len(top) != TOP_N or top["ligand_id"].duplicated().any():
@@ -152,7 +152,7 @@ def main():
 
     summary = (
         pd.DataFrame(summary_data)
-        .sort_values("affinity")
+        .sort_values(["affinity", "ligand_id"], kind="mergesort")
         .reset_index(drop=True)
     )
 
