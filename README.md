@@ -13,7 +13,7 @@
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?logo=jupyter)](https://jupyter.org/)
 [![RDKit](https://img.shields.io/badge/RDKit-2024-green)](https://www.rdkit.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-32%20passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)](tests/)
 [![Conda](https://img.shields.io/badge/conda-environment-green?logo=anaconda)](environment.yml)
 
 ---
@@ -50,7 +50,7 @@ The project combines **educational Jupyter notebooks** with reusable Python modu
 | **Docking engine**        | Smina                        |
 | **Docking configuration** | `configs/docking_config.yml` |
 | **Docking audit**         | `scripts/audit_docking.py`   |
-| **Automated tests**       | 30 passing                   |
+| **Automated tests**       | 37 passing                   |
 
 The standardized screening workflow is configuration-driven and uses a single authoritative docking configuration rather than duplicating docking parameters across multiple scripts. Exact validation environments are captured separately by the provenance workflow; `environment.yml` is the reproducible environment specification, while the captured environment snapshot records the concrete packages used for a particular validated run.
 
@@ -292,7 +292,7 @@ The current standardized screening ranks the following compounds highest by dock
 |    2 | **13U** |                **-9.51** | Excellent  | Pass  | Clean |
 |    3 | **BAH** |                **-9.41** | Acceptable | Fail  | Clean |
 |    4 | **12U** |                **-9.37** | Excellent  | Pass  | Clean |
-|    5 | **T87** |                **-9.27** | Excellent  | Fail  | Clean |
+|    5 | **607** |                **-9.33** | Excellent  | Fail  | Clean |
 
 These values are **docking scores**, not experimental binding measurements.
 
@@ -382,7 +382,7 @@ These MD and MM-PBSA results are historical/reference-system results and should 
 
 ## 🧪 Testing and Validation
 
-The repository currently contains **32 automated tests**, all passing in the validated development environment:
+The repository currently contains **37 automated tests**, all passing in the validated development environment:
 
 ```bash
 pytest -q
@@ -391,7 +391,7 @@ pytest -q
 Current result:
 
 ```text
-32 passed
+37 passed
 ```
 
 The test suite covers:
