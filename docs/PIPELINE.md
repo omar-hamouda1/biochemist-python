@@ -206,7 +206,7 @@ Historical recovery-stage affinity files are retained separately and are not use
 | 2    | 13U    | -9.511141           |
 | 3    | BAH    | -9.413809           |
 | 4    | 12U    | -9.374041           |
-| 5    | T87    | -9.270527           |
+| 5    | 607    | -9.332170           |
 
 These are computational docking scores used for ranking and should not be interpreted as experimental binding affinities.
 
