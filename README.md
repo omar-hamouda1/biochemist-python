@@ -360,11 +360,15 @@ They should **not** be interpreted as molecular-dynamics validation of the curre
 * Ligand RMSF: **1.07 Å**
 * Ligand atoms exceeding 3 Å RMSF: **0 / 65**
 
-### MM-PBSA
+### MM/GBSA-style Analysis
 
-* ΔG_binding: **−32.13 ± 17.22 kcal/mol**
+The historical calculation uses **MMPBSA.py with the Generalized Born model (`igb=5`)** rather than a Poisson–Boltzmann model.
+
+* ΔG estimate: **−32.13 ± 17.22 kcal/mol**
 * van der Waals contribution: **−34.32 kcal/mol**
 * Electrostatic contribution: **−11.22 kcal/mol**
+
+This is a model-based computational estimate, not an experimental binding free energy.
 
 ### Key interaction residues
 
@@ -374,9 +378,9 @@ For the historical 13U–Trypsin system, ProLIF identified high-occupancy intera
 * SER172
 * SER192
 * GLY196
-* **TRP193** — anchor residue in the historical analysis
+* **TRP193** — largest favorable protein-side contribution in the stored decomposition
 
-These MD and MM-PBSA results are historical/reference-system results and should be interpreted separately from the current 111-ligand standardized docking campaign.
+These MD and MM/GBSA-style results are historical/reference-system results and should be interpreted separately from the current 111-ligand standardized docking campaign. They do not experimentally validate the docking ranking.
 
 ---
 
