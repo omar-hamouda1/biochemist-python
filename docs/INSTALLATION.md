@@ -187,7 +187,7 @@ Run the complete test suite:
 pytest -q
 ```
 
-The repository currently contains 30 automated tests covering the core reusable modules and standardized docking configuration/utilities.
+The repository currently contains 37 automated tests covering the core reusable modules, standardized docking configuration, provenance, and pipeline-coherence checks.
 
 To check Python syntax for the project scripts:
 
@@ -223,11 +223,11 @@ docking/results/standardized_affinities.csv
 The current Top 5 standardized docking results are:
 
 ```text
-R11   -9.7876091
-13U   -9.51114082
-BAH   -9.41380882
-12U   -9.3740406
-T87   -9.27052689
+R11   -9.83414936
+13U   -9.43803596
+BAH   -9.42084408
+12U   -9.33996773
+607   -9.33216953
 ```
 
 These docking scores are computational ranking scores and should not be interpreted as experimental binding affinities.
