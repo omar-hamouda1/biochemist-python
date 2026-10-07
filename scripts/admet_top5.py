@@ -38,7 +38,7 @@ def load_top_hits(report_path: Path):
 
 
 def load_ligand(ligand_id, fixed_dir):
-    path = fixed_dir / f"{ligand_id}_fixed.sd"
+    path = fixed_dir / f"{ligand_id}_fixed.sdf"
     if not path.exists():
         raise FileNotFoundError(path)
 
