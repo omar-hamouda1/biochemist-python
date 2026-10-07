@@ -74,7 +74,7 @@ Stage 6: Analysis            Stage 5: Properties         Stage 4: Docking
 ### Key Data
 
 * **Myoglobin structures:** 40+ CIF files in `pdb_files/`
-* **Target protein:** Trypsin (2ZQ2) — 1.7 Å resolution
+* **Target protein:** Trypsin (2ZQ2) — 1.40 Å resolution
 
 ---
 
