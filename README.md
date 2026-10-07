@@ -288,10 +288,10 @@ The current standardized screening ranks the following compounds highest by dock
 
 | Rank | Ligand  | Docking score (kcal/mol) | Lipinski   | Veber | PAINS |
 | ---: | ------- | -----------------------: | ---------- | ----- | ----- |
-|    1 | **R11** |                **-9.79** | Excellent  | Pass  | Clean |
-|    2 | **13U** |                **-9.51** | Excellent  | Pass  | Clean |
-|    3 | **BAH** |                **-9.41** | Acceptable | Fail  | Clean |
-|    4 | **12U** |                **-9.37** | Excellent  | Pass  | Clean |
+|    1 | **R11** |                **-9.83** | Excellent  | Pass  | Clean |
+|    2 | **13U** |                **-9.44** | Excellent  | Pass  | Clean |
+|    3 | **BAH** |                **-9.42** | Acceptable | Fail  | Clean |
+|    4 | **12U** |                **-9.34** | Excellent  | Pass  | Clean |
 |    5 | **607** |                **-9.33** | Excellent  | Fail  | Clean |
 
 These values are **docking scores**, not experimental binding measurements.
