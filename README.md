@@ -11,7 +11,7 @@
 
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?logo=python\&logoColor=white)](https://www.python.org/downloads/release/python-3110/)
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?logo=jupyter)](https://jupyter.org/)
-[![RDKit](https://img.shields.io/badge/RDKit-2024-green)](https://www.rdkit.org/)
+[![RDKit](https://img.shields.io/badge/RDKit-2023.09.6-green)](https://www.rdkit.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)](tests/)
 [![Conda](https://img.shields.io/badge/conda-environment-green?logo=anaconda)](environment.yml)
