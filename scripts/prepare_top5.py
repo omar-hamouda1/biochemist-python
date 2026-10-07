@@ -230,7 +230,7 @@ def prepare_top5():
 
     for lid in top_5:
         pdbqt = config.output_dir / f"{lid}_out.pdbqt"
-        output = OUTPUT_DIR / f"{lid}_fixed.sd"
+        output = OUTPUT_DIR / f"{lid}_fixed.sdf"
         template = PROJECT_ROOT / "ligands" / f"{lid}.sdf"
 
         if not pdbqt.exists():
