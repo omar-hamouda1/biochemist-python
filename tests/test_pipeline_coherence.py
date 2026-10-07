@@ -92,7 +92,7 @@ def test_current_top5_artifact_contract_is_sdf():
     for path in active_paths:
         source = path.read_text()
         assert "_fixed.sdf" in source
-        assert "_fixed.sd" not in source
+        assert "_fixed.sd" not in source.replace("_fixed.sdf", "")
 
     assert "docking/results/fixed/*.sdf" in (ROOT / ".gitignore").read_text()
 
