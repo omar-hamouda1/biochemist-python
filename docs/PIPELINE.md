@@ -26,7 +26,7 @@ Stage 6: Analysis            Stage 5: Properties         Stage 4: Docking
 ┌──────────────────┐         ┌──────────────────┐       ┌──────────────────┐
 │ MD Trajectory    │         │ Lipinski / Veber │       │ Standardized     │
 │ RMSD / RMSF      │◀────────│ Drug-likeness    │◀──────│ Smina            │
-│ MM/PBSA          │         │ PAINS Filtering  │       │ Virtual Screen   │
+│ MM/GBSA-style   │         │ PAINS Filtering  │       │ Virtual Screen   │
 │ ProLIF Analysis  │         │ RDKit Descriptors│       │ 111 ligands      │
 └──────────────────┘         └──────────────────┘       │ Ranked by score  │
  NB: 16                       NB: 15                    └──────────────────┘
