@@ -306,8 +306,8 @@ Notebook 13 performs binding-site and protein–ligand interaction analysis for 
 
 The validated structure-preparation workflow includes:
 
-* deterministic protein alternate-location resolution
-* PDB2PQR-based protein protonation
+* deterministic protein alternate-location resolution via `scripts/prepare_protein.py`
+* PDB2PQR-based protein protonation at pH 7.4 using PARSE
 * RDKit ligand bond-order assignment
 * Open Babel hydrogen addition
 * ProLIF interaction analysis
@@ -447,6 +447,7 @@ biochemist-python/
 │   ├── audit_docking.py          # Standardized docking audit
 │   ├── run_standardized_docking.py
 │   ├── prepare_ligands.py        # Provenance-aware ligand preparation
+│   ├── prepare_protein.py        # Deterministic protein altLoc/PDB2PQR preparation
 │   ├── prepare_receptor.py       # Deterministic receptor PDBQT preparation
 │   ├── build_provenance_manifest.py
 │   └── capture_environment.py    # Exact validation-environment snapshot

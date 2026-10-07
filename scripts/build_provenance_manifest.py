@@ -26,6 +26,7 @@ RUNNER = PROJECT_ROOT / "scripts" / "run_standardized_docking.py"
 PARSER = PROJECT_ROOT / "src" / "docking.py"
 PREPARER = PROJECT_ROOT / "scripts" / "prepare_ligands.py"
 RECEPTOR_PREPARER = PROJECT_ROOT / "scripts" / "prepare_receptor.py"
+PROTEIN_PREPARER = PROJECT_ROOT / "scripts" / "prepare_protein.py"
 
 
 def package_version(name: str) -> str:
@@ -180,6 +181,7 @@ def main() -> None:
             "provenance": receptor_metadata,
             "preparation_script_sha256": sha256_file(RECEPTOR_PREPARER),
             "upstream_source_sha256": sha256_file(PROJECT_ROOT / "pdb" / "protein_h.pdb"),
+            "upstream_preparation_script_sha256": sha256_file(PROTEIN_PREPARER),
             "upstream_notebook_sha256": sha256_file(
                 PROJECT_ROOT / "notebooks" / "13_binding_site.ipynb"
             ),
@@ -189,6 +191,7 @@ def main() -> None:
             "parser_sha256": sha256_file(PARSER),
             "ligand_preparer_sha256": sha256_file(PREPARER),
             "receptor_preparer_sha256": sha256_file(RECEPTOR_PREPARER),
+            "protein_preparer_sha256": sha256_file(PROTEIN_PREPARER),
         },
         "tools": {
             "smina": executable_version(config.smina_executable),

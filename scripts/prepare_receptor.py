@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SOURCE = PROJECT_ROOT / "pdb" / "protein_h.pdb"
 OUTPUT = PROJECT_ROOT / "docking" / "receptor" / "2zq2_receptor.pdbqt"
 SCRIPT_PATH = Path(__file__).resolve()
-PDB2PQR_NOTEBOOK = PROJECT_ROOT / "notebooks" / "13_binding_site.ipynb"
+PROTEIN_PREPARER = PROJECT_ROOT / "scripts" / "prepare_protein.py"
 
 
 def is_valid_pdbqt(path: Path) -> bool:
@@ -71,8 +71,8 @@ def prepare_receptor() -> None:
             "output": str(OUTPUT.relative_to(PROJECT_ROOT)),
             "command": command,
             "rigid_receptor": True,
-            "protein_preparation_notebook": str(
-                PDB2PQR_NOTEBOOK.relative_to(PROJECT_ROOT)
+            "protein_preparation_script": str(
+                PROTEIN_PREPARER.relative_to(PROJECT_ROOT)
             ),
         },
         artifact_kind="prepared_receptor_pdbqt",
@@ -82,7 +82,7 @@ def prepare_receptor() -> None:
         metadata,
         output_path=OUTPUT,
         extra={
-            "upstream_producer": str(PDB2PQR_NOTEBOOK.relative_to(PROJECT_ROOT)),
+            "upstream_producer": str(PROTEIN_PREPARER.relative_to(PROJECT_ROOT)),
         },
     )
 

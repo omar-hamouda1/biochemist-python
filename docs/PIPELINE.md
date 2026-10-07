@@ -166,7 +166,15 @@ docking/results/standardized_affinities.csv
 
 ### Receptor and ligand provenance
 
-Receptor preparation is deterministic and recorded by:
+Protein preparation is deterministic and recorded by:
+
+```bash
+python -m scripts.prepare_protein
+```
+
+This resolves protein alternate locations by highest mean occupancy per residue, writes a coordinate-only PDB for PDB2PQR, and runs PDB2PQR at pH 7.4 with PARSE.
+
+The prepared PDB2PQR product is then converted to the rigid receptor PDBQT by:
 
 ```bash
 python -m scripts.prepare_receptor
@@ -188,7 +196,7 @@ python -m scripts.build_provenance_manifest
 python -m scripts.audit_docking --check-artifacts --check-provenance
 ```
 
-The tracked `docking/results/standardized_provenance.json` records hashes for the configuration, source structures, preparation and docking code, tools, prepared ligands, docking poses, and validation environment.
+The tracked `docking/results/standardized_provenance.json` records hashes for the configuration, source structures, protein/receptor preparation and docking code, tools, prepared ligands, docking poses, and validation environment.
 
 The standardized pose files are written under:
 
