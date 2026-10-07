@@ -80,20 +80,19 @@ def test_current_analysis_notebooks_have_valid_python_code():
             ast.parse(source, filename=f"{notebook_path}:{index}")
 
 def test_current_top5_artifact_contract_is_sdf():
-    """Downstream Top-5 scripts and tracked artifacts must use one extension."""
-    top5 = ["R11", "13U", "BAH", "12U", "607"]
-    fixed_dir = ROOT / "docking/results/fixed"
+    """All active Top-5 consumers must use the same generated-file extension."""
+    active_paths = [
+        ROOT / "scripts/prepare_top5.py",
+        ROOT / "scripts/prolif_analysis.py",
+        ROOT / "scripts/admet_top5.py",
+        ROOT / "notebooks/solutions/14b_docking_solved.ipynb",
+        ROOT / "notebooks/15_admet_prediction.ipynb",
+    ]
 
-    for ligand_id in top5:
-        assert (fixed_dir / f"{ligand_id}_fixed.sdf").exists()
-        assert not (fixed_dir / f"{ligand_id}_fixed.sd").exists()
-
-    for script_name in [
-        "scripts/prepare_top5.py",
-        "scripts/prolif_analysis.py",
-        "scripts/admet_top5.py",
-    ]:
-        source = (ROOT / script_name).read_text()
+    for path in active_paths:
+        source = path.read_text()
         assert "_fixed.sdf" in source
         assert "_fixed.sd" not in source
+
+    assert "docking/results/fixed/*.sdf" in (ROOT / ".gitignore").read_text()
 
