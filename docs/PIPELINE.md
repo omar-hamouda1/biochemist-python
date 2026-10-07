@@ -259,12 +259,12 @@ Notebook 15 is retained as educational analysis material and should not be treat
 * NVT and NPT equilibration
 * Production MD
 * Trajectory analysis (RMSD, RMSF, hydrogen bonds)
-* MM/PBSA binding-energy decomposition
+* MM/GBSA-style binding-energy decomposition using the Generalized Born model
 * ProLIF interaction analysis
 
 The MD analysis documented in this repository is based on the historical Trypsin–13U reference-ligand system.
 
-The MD results provide computational evidence about the behavior of 13U in that simulated complex. They do not experimentally validate the current docking ranking, and they do not constitute MD validation of the current top-ranked ligand R11.
+The MD results provide model-based computational evidence about the behavior of 13U in that simulated complex. They do not experimentally validate the current docking ranking, and they do not constitute MD validation of the current top-ranked ligand R11.
 
 ### Software
 
