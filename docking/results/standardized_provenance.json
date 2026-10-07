@@ -2,7 +2,7 @@
   "authoritative_files": {
     "standardized_report": {
       "path": "docking/results/standardized_affinities.csv",
-      "sha256": "4613c5777d2d9cf9115c4e02452d11956ae82c3f322fd2a3ace6e78bbea063a2"
+      "sha256": "a92801664404f185c0f3f0f185ef06256b5cddaa0f92bd277e4ca25936b73e6b"
     },
     "validated_manifest": {
       "path": "docking/results/validated_ligands_111.csv",
@@ -13,7 +13,7 @@
     "path": "configs/docking_config.yml",
     "sha256": "a98ca67bea80033eed7f881ad696ff3d850da4c9eba5de50cb9afdc32bb85700"
   },
-  "created_utc": "2026-10-07T07:41:53.746970+00:00",
+  "created_utc": "2026-10-07T08:54:36.940685+00:00",
   "docking_outputs": [
     {
       "affinity": -9.43803596,
@@ -795,23 +795,24 @@
   ],
   "environment_snapshot": {
     "path": "docking/results/standardized_environment.txt",
-    "sha256": null
+    "sha256": "3ea5fa161b469923b99629059ecc3912615ba93a5262d412b1a77f54fb60b0fc"
   },
-  "git_commit_at_generation": "a74c3e440c957caa2ebb5d48d144abf392a31bab",
+  "git_commit_at_generation": "17989a51980600d78665c38659bd7caaa37f17d1",
   "pipeline_code": {
     "ligand_preparer_sha256": "3fb6b724ec01c9e82aff9a431f878bce3a69aef73adcb674abdcf4c7a05374aa",
     "parser_sha256": "365f33fad2c0083115b3068ce005bd0564a57df7d6a7450013b7558ebb7271dd",
-    "receptor_preparer_sha256": "f211e672f75944ff1c8bb22286cee08b4df51d8b23cb2b05f0e4b9222e3332bc",
+    "protein_preparer_sha256": "7e7c1936cc386e222653004136769955ba31b755e45c293da839441bc1db1049",
+    "receptor_preparer_sha256": "55a8fb272544434cfcda2c24ad4523cf49d3b098e4025bdd9ad8a2de3b510d6f",
     "runner_sha256": "a1e4b9f08489e9ef85a8f21a52142c452fcf638024f7a06c0933f6e855f9116e"
   },
   "receptor": {
     "path": "docking/receptor/2zq2_receptor.pdbqt",
-    "preparation_script_sha256": "f211e672f75944ff1c8bb22286cee08b4df51d8b23cb2b05f0e4b9222e3332bc",
+    "preparation_script_sha256": "55a8fb272544434cfcda2c24ad4523cf49d3b098e4025bdd9ad8a2de3b510d6f",
     "provenance": {
       "artifact_kind": "prepared_receptor_pdbqt",
-      "fingerprint": "7631d747531cf350653c990f07cd4e98a367288edc0f38447da40ac8eaaa9feb",
+      "fingerprint": "9bec22a4b8dc939447ca755d65bd863d6a9c89c0457457f2fe46fc83ac4d901d",
       "output_sha256": "daac8d7ab83e1f4790874fb2476bb0d6deb5d5b076c9667dad705ed7ca065352",
-      "producer_sha256": "f211e672f75944ff1c8bb22286cee08b4df51d8b23cb2b05f0e4b9222e3332bc",
+      "producer_sha256": "55a8fb272544434cfcda2c24ad4523cf49d3b098e4025bdd9ad8a2de3b510d6f",
       "protocol": {
         "command": [
           "obabel",
@@ -824,7 +825,7 @@
         ],
         "input": "pdb/protein_h.pdb",
         "output": "docking/receptor/2zq2_receptor.pdbqt",
-        "protein_preparation_notebook": "notebooks/13_binding_site.ipynb",
+        "protein_preparation_script": "scripts/prepare_protein.py",
         "rigid_receptor": true
       },
       "schema_version": 2,
@@ -833,10 +834,11 @@
         "openbabel": "Open Babel 3.1.0 -- Nov 30 2023 -- 20:41:23 Usage: obabel [-i<input-type>] <infilename> [-o<output-type>] -O<outfilename> [Options] Try -H option for more information.",
         "pdb2pqr": "pdb2pqr 3.7.1"
       },
-      "upstream_producer": "notebooks/13_binding_site.ipynb"
+      "upstream_producer": "scripts/prepare_protein.py"
     },
     "sha256": "daac8d7ab83e1f4790874fb2476bb0d6deb5d5b076c9667dad705ed7ca065352",
-    "upstream_notebook_sha256": "9c4e3d7f800d3a60d1df9eed7fce87498ea75eb38198cd7f07765832a272ab55",
+    "upstream_notebook_sha256": "297fcce13298ce1f5efb7e666e80ef027e64d81c73610f5b2a7ba061e586f492",
+    "upstream_preparation_script_sha256": "7e7c1936cc386e222653004136769955ba31b755e45c293da839441bc1db1049",
     "upstream_source_sha256": "e680dd3cb00d12de2f034d98c4fcbd1ad9d25c3ee0dcf593a8ef437bb5bf4701"
   },
   "schema_version": 1,
