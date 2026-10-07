@@ -76,7 +76,7 @@ def main():
     ligand_residues = {}
 
     for lid in ligands:
-        sdf_path = fixed_dir / f"{lid}_fixed.sd"
+        sdf_path = fixed_dir / f"{lid}_fixed.sdf"
         ligand_rdkit = Chem.MolFromMolFile(
             str(sdf_path), removeHs=False, sanitize=True
         )
