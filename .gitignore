@@ -68,7 +68,7 @@ scripts_backup/
 *.bak
 
 # Generated ProLIF pose files
-docking/results/fixed/*.sd
+docking/results/fixed/*.sdf
 
 # Docking provenance sidecars (generated locally; summarized in the provenance manifest)
 *.pdbqt.provenance.json
