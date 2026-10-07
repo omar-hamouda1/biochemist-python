@@ -545,7 +545,6 @@ If you use this project in teaching, research, or derived computational work, pl
 ## 📖 References
 
 * [RCSB Protein Data Bank](https://www.rcsb.org/)
-* [MolSSI — Molecular Sciences Software Institute](https://molssi.org/)
 * [AutoDock Vina](https://vina.scripps.edu/)
 * [ProLIF](https://prolif.readthedocs.io/)
 * [OpenMM](https://openmm.org/)
