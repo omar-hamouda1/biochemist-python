@@ -86,4 +86,4 @@ def get_top_hits(
         Top N rows sorted by affinity, with the most negative score first.
     """
     df = load_affinities(csv_path)
-    return df.sort_values("affinity").head(n)
+    return df.sort_values(["affinity", "ligand_id"], kind="mergesort").head(n)

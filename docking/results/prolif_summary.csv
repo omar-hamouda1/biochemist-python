@@ -1,6 +1,6 @@
 ligand_id,affinity,n_interactions,n_residues,interaction_types
-R11,-9.7876091,14,9,VdWContact:8; Hydrophobic:3; HBDonor:2; HBAcceptor:1
-13U,-9.51114082,11,8,VdWContact:8; HBDonor:3
-BAH,-9.41380882,23,20,VdWContact:19; Cationic:2; Hydrophobic:1; HBDonor:1
-12U,-9.3740406,11,9,VdWContact:9; HBDonor:2
-T87,-9.27052689,15,11,VdWContact:8; Hydrophobic:3; HBDonor:2; PiStacking:1; PiCation:1
+R11,-9.83414936,14,8,VdWContact:7; Hydrophobic:3; HBDonor:3; HBAcceptor:1
+13U,-9.43803596,12,9,VdWContact:9; HBDonor:3
+BAH,-9.42084408,25,19,VdWContact:18; HBDonor:4; Cationic:2; Hydrophobic:1
+12U,-9.33996773,11,9,VdWContact:9; HBDonor:2
+607,-9.33216953,34,26,VdWContact:26; HBDonor:4; Hydrophobic:2; Cationic:2

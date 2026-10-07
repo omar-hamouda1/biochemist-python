@@ -26,7 +26,7 @@ Stage 6: Analysis            Stage 5: Properties         Stage 4: Docking
 ┌──────────────────┐         ┌──────────────────┐       ┌──────────────────┐
 │ MD Trajectory    │         │ Lipinski / Veber │       │ Standardized     │
 │ RMSD / RMSF      │◀────────│ Drug-likeness    │◀──────│ Smina            │
-│ MM/PBSA          │         │ PAINS Filtering  │       │ Virtual Screen   │
+│ MM/GBSA-style   │         │ PAINS Filtering  │       │ Virtual Screen   │
 │ ProLIF Analysis  │         │ RDKit Descriptors│       │ 111 ligands      │
 └──────────────────┘         └──────────────────┘       │ Ranked by score  │
  NB: 16                       NB: 15                    └──────────────────┘
@@ -164,6 +164,40 @@ The authoritative docking report is:
 docking/results/standardized_affinities.csv
 ```
 
+### Receptor and ligand provenance
+
+Protein preparation is deterministic and recorded by:
+
+```bash
+python -m scripts.prepare_protein
+```
+
+This resolves protein alternate locations by highest mean occupancy per residue, writes a coordinate-only PDB for PDB2PQR, and runs PDB2PQR at pH 7.4 with PARSE.
+
+The prepared PDB2PQR product is then converted to the rigid receptor PDBQT by:
+
+```bash
+python -m scripts.prepare_receptor
+```
+
+It converts the PDB2PQR-prepared `pdb/protein_h.pdb` to the rigid receptor PDBQT using the documented Open Babel protocol.
+
+Ligand preparation is project-rooted and provenance-aware:
+
+```bash
+python -m scripts.prepare_ligands
+```
+
+Each generated PDBQT receives a local provenance sidecar. These sidecars are intentionally ignored by Git; the reviewable run-level record is generated after the full screening run:
+
+```bash
+python -m scripts.capture_environment
+python -m scripts.build_provenance_manifest
+python -m scripts.audit_docking --check-artifacts --check-provenance
+```
+
+The tracked `docking/results/standardized_provenance.json` records hashes for the configuration, source structures, protein/receptor preparation and docking code, tools, prepared ligands, docking poses, and validation environment.
+
 The standardized pose files are written under:
 
 ```text
@@ -176,11 +210,11 @@ Historical recovery-stage affinity files are retained separately and are not use
 
 | Rank | Ligand | Affinity (kcal/mol) |
 | ---- | ------ | ------------------- |
-| 1    | R11    | -9.787609           |
-| 2    | 13U    | -9.511141           |
-| 3    | BAH    | -9.413809           |
-| 4    | 12U    | -9.374041           |
-| 5    | T87    | -9.270527           |
+| 1    | R11    | -9.834149           |
+| 2    | 13U    | -9.438036           |
+| 3    | BAH    | -9.420844           |
+| 4    | 12U    | -9.339968           |
+| 5    | 607    | -9.332170           |
 
 These are computational docking scores used for ranking and should not be interpreted as experimental binding affinities.
 
@@ -225,12 +259,12 @@ Notebook 15 is retained as educational analysis material and should not be treat
 * NVT and NPT equilibration
 * Production MD
 * Trajectory analysis (RMSD, RMSF, hydrogen bonds)
-* MM/PBSA binding-energy decomposition
+* MM/GBSA-style binding-energy decomposition using the Generalized Born model
 * ProLIF interaction analysis
 
 The MD analysis documented in this repository is based on the historical Trypsin–13U reference-ligand system.
 
-The MD results provide computational evidence about the behavior of 13U in that simulated complex. They do not experimentally validate the current docking ranking, and they do not constitute MD validation of the current top-ranked ligand R11.
+The MD results provide model-based computational evidence about the behavior of 13U in that simulated complex. They do not experimentally validate the current docking ranking, and they do not constitute MD validation of the current top-ranked ligand R11.
 
 ### Software
 
@@ -274,6 +308,7 @@ biochemist-python_ORGANIZED/
 │   ├── protein.py      # Protein structure utilities
 │   ├── admet.py        # Drug-likeness/property calculations
 │   ├── docking.py      # Standardized docking result parsing
+│   ├── docking_config.py# Validated docking configuration model
 │   └── visualization.py# 3D visualization helpers
 ├── scripts/            # Standalone analysis and pipeline scripts
 ├── tests/              # Unit tests (pytest)

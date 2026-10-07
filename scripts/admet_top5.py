@@ -1,33 +1,50 @@
-import os
+"""Calculate rule-based molecular-property filters for the current Top 5."""
+
+from pathlib import Path
 
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Lipinski, rdMolDescriptors
 from rdkit.Chem.FilterCatalog import FilterCatalog, FilterCatalogParams
 
-DOCKING_RESULTS = "docking/results/standardized_affinities.csv"
-FIXED_DIR = "docking/results/fixed"
-OUTPUT_DIR = "docking/results/admet"
+from src.docking_config import load_docking_config
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TOP_N = 5
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+def load_top_hits(report_path: Path):
+    ranking = pd.read_csv(report_path)
+    required = {"ligand_id", "affinity", "status"}
+    missing = required - set(ranking.columns)
+    if missing:
+        raise RuntimeError(
+            f"Standardized report missing columns: {sorted(missing)}"
+        )
 
-def load_top_hits():
-    ranking = pd.read_csv(DOCKING_RESULTS)
-    ranking["affinity"] = pd.to_numeric(ranking["affinity"], errors="coerce")
+    ranking["affinity"] = pd.to_numeric(
+        ranking["affinity"], errors="coerce"
+    )
     ranking = ranking[
         ranking["status"].isin(["ok", "existing"])
     ].dropna(subset=["affinity"])
-    return ranking.sort_values("affinity").head(TOP_N).reset_index(drop=True)
+    ranking = ranking.sort_values(["affinity", "ligand_id"], kind="mergesort").reset_index(drop=True)
+
+    top = ranking.head(TOP_N)
+    if len(top) != TOP_N or top["ligand_id"].duplicated().any():
+        raise RuntimeError("Current standardized Top 5 is incomplete or duplicated")
+
+    return top
 
 
-def load_ligand(ligand_id):
-    path = os.path.join(FIXED_DIR, f"{ligand_id}_fixed.sd")
-    if not os.path.exists(path):
+def load_ligand(ligand_id, fixed_dir):
+    path = fixed_dir / f"{ligand_id}_fixed.sd"
+    if not path.exists():
         raise FileNotFoundError(path)
 
-    mol = Chem.MolFromMolFile(path, removeHs=False, sanitize=True)
+    mol = Chem.MolFromMolFile(
+        str(path), removeHs=False, sanitize=True
+    )
     if mol is None:
         raise ValueError(f"RDKit could not parse {path}")
 
@@ -80,81 +97,56 @@ def pains_catalog():
     return FilterCatalog(params)
 
 
-ranking = load_top_hits()
+def main():
+    config = load_docking_config()
+    ranking = load_top_hits(config.report)
+    fixed_dir = PROJECT_ROOT / "docking" / "results" / "fixed"
+    output_dir = PROJECT_ROOT / "docking" / "results" / "admet"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-print("=" * 72)
-print("  ADMET / Drug-likeness Analysis: Standardized Top 5")
-print("=" * 72)
-print("\nTop 5:")
-for rank, row in ranking.iterrows():
-    print(f"  {rank + 1}. {row['ligand_id']:5s}  {row['affinity']:.6f}")
+    catalog = pains_catalog()
+    rows = []
 
-catalog = pains_catalog()
-rows = []
+    print("=" * 72)
+    print("  ADMET / Drug-likeness Analysis: Standardized Top 5")
+    print("=" * 72)
 
-for _, row in ranking.iterrows():
-    lid = row["ligand_id"]
-    mol, path = load_ligand(lid)
-    props = descriptors(mol)
-    lip_violations, lip_verdict = lipinski(props)
-    veb_violations, veb_verdict = veber(props)
+    for rank, (_, row) in enumerate(ranking.iterrows(), start=1):
+        lid = str(row["ligand_id"])
+        mol, path = load_ligand(lid, fixed_dir)
+        props = descriptors(mol)
+        lip_violations, lip_verdict = lipinski(props)
+        veb_violations, veb_verdict = veber(props)
 
-    matches = catalog.GetMatches(mol)
-    alerts = [match.GetDescription() for match in matches]
+        matches = catalog.GetMatches(mol)
+        alerts = [match.GetDescription() for match in matches]
 
-    rows.append(
-        {
-            "rank": int(len(rows) + 1),
-            "ligand_id": lid,
-            "affinity": float(row["affinity"]),
-            **props,
-            "Lipinski_Violations": lip_violations,
-            "Lipinski_Verdict": lip_verdict,
-            "Veber_Violations": veb_violations,
-            "Veber_Verdict": veb_verdict,
-            "PAINS_Alerts": len(alerts),
-            "PAINS_Verdict": "Clean" if not alerts else "Flagged",
-            "PAINS_Details": "; ".join(alerts),
-            "source_pose": path,
-        }
-    )
+        rows.append(
+            {
+                "rank": rank,
+                "ligand_id": lid,
+                "affinity": float(row["affinity"]),
+                **props,
+                "Lipinski_Violations": lip_violations,
+                "Lipinski_Verdict": lip_verdict,
+                "Veber_Violations": veb_violations,
+                "Veber_Verdict": veb_verdict,
+                "PAINS_Alerts": len(alerts),
+                "PAINS_Verdict": "Clean" if not alerts else "Flagged",
+                "PAINS_Details": "; ".join(alerts),
+                "source_pose": str(path.relative_to(PROJECT_ROOT)),
+            }
+        )
 
-summary = pd.DataFrame(rows)
+    summary = pd.DataFrame(rows)
 
-summary.to_csv(
-    os.path.join(OUTPUT_DIR, "admet_summary.csv"),
-    index=False,
-)
+    if len(summary) != TOP_N or set(summary["ligand_id"]) != set(ranking["ligand_id"]):
+        raise RuntimeError("ADMET summary does not contain exactly the current Top 5")
 
-summary[
-    [
-        "ligand_id",
-        "affinity",
-        "MW",
-        "LogP",
-        "HBD",
-        "HBA",
-        "TPSA",
-        "RotB",
-        "Lipinski_Violations",
-        "Lipinski_Verdict",
-        "Veber_Violations",
-        "Veber_Verdict",
-        "PAINS_Alerts",
-        "PAINS_Verdict",
-    ]
-].to_csv(
-    os.path.join(OUTPUT_DIR, "admet_top5.csv"),
-    index=False,
-)
+    summary.to_csv(output_dir / "admet_summary.csv", index=False)
 
-print("\n" + "=" * 72)
-print("  Final ADMET / Drug-likeness Summary")
-print("=" * 72)
-print(
     summary[
         [
-            "rank",
             "ligand_id",
             "affinity",
             "MW",
@@ -170,9 +162,16 @@ print(
             "PAINS_Alerts",
             "PAINS_Verdict",
         ]
-    ].to_string(index=False)
-)
+    ].to_csv(output_dir / "admet_top5.csv", index=False)
 
-print(f"\nSaved: {OUTPUT_DIR}/admet_summary.csv")
-print(f"Saved: {OUTPUT_DIR}/admet_top5.csv")
-print("\nNote: these are RDKit descriptors and rule-based filters, not full ADME/Toxicity predictions.")
+    print(summary.to_string(index=False))
+    print(f"\nSaved: {output_dir / 'admet_summary.csv'}")
+    print(f"Saved: {output_dir / 'admet_top5.csv'}")
+    print(
+        "\nNote: these are RDKit descriptors and rule-based filters, "
+        "not full ADME/Toxicity predictions."
+    )
+
+
+if __name__ == "__main__":
+    main()

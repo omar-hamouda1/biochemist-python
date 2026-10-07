@@ -5,10 +5,20 @@ from __future__ import annotations
 import csv
 import shutil
 import subprocess
+
+from src.provenance import (
+    build_metadata,
+    executable_version,
+    output_has_atoms,
+    provenance_path,
+    sha256_file,
+    validate_existing_output,
+    write_metadata,
+)
 from pathlib import Path
 
 from src.docking import parse_smina_output
-from src.docking_config import DockingConfig, load_docking_config
+from src.docking_config import DEFAULT_CONFIG_PATH, DockingConfig, load_docking_config
 
 
 def build_smina_command(
@@ -39,7 +49,7 @@ def parse_affinity(path: Path) -> float | None:
     """Return the first affinity recorded in a Smina output file."""
 
     affinities = parse_smina_output(str(path))
-    return affinities[0] if affinities else None
+    return affinities[0] if len(affinities) == 1 else None
 
 
 def load_ligands(config: DockingConfig) -> list[str]:
@@ -59,21 +69,50 @@ def load_ligands(config: DockingConfig) -> list[str]:
     return ligand_ids
 
 
-def run_one(config: DockingConfig, ligand_id: str):
+def run_one(
+    config: DockingConfig,
+    ligand_id: str,
+    *,
+    config_path: Path,
+    runner_path: Path,
+    parser_path: Path,
+    smina_version: str,
+):
     ligand = config.ligand_dir / f"{ligand_id}.pdbqt"
     output = config.output_dir / f"{ligand_id}_out.pdbqt"
 
     if not ligand.exists():
         return ligand_id, None, "ligand_missing", str(ligand)
 
+    command = build_smina_command(config, ligand, output)
+    metadata = build_metadata(
+        config_path=config_path,
+        receptor_path=config.receptor,
+        ligand_path=ligand,
+        runner_path=runner_path,
+        parser_path=parser_path,
+        smina_version=smina_version,
+        command=command,
+    )
+    metadata_path = provenance_path(output)
+
     existing = parse_affinity(output)
-    if existing is not None:
+    if (
+        existing is not None
+        and output_has_atoms(output)
+        and validate_existing_output(
+            output_path=output,
+            metadata_path=metadata_path,
+            expected_metadata=metadata,
+            expected_affinity=existing,
+        )
+    ):
         return ligand_id, existing, "existing", ""
 
     if output.exists():
         output.unlink()
-
-    command = build_smina_command(config, ligand, output)
+    if metadata_path.exists():
+        metadata_path.unlink()
 
     try:
         result = subprocess.run(
@@ -89,7 +128,13 @@ def run_one(config: DockingConfig, ligand_id: str):
         return ligand_id, None, "timeout", f">{config.timeout_seconds}s"
 
     affinity = parse_affinity(output)
-    if affinity is not None:
+    if affinity is not None and output_has_atoms(output):
+        write_metadata(
+            metadata_path,
+            metadata,
+            output_sha256=sha256_file(output),
+            affinity=affinity,
+        )
         return ligand_id, affinity, "ok", ""
 
     message = (result.stderr or result.stdout).replace("\n", " ").strip()
@@ -97,7 +142,10 @@ def run_one(config: DockingConfig, ligand_id: str):
 
 
 def main() -> None:
-    config = load_docking_config()
+    config_path = DEFAULT_CONFIG_PATH
+    config = load_docking_config(config_path)
+    runner_path = Path(__file__).resolve()
+    parser_path = (Path(__file__).resolve().parents[1] / "src" / "docking.py").resolve()
 
     if not config.receptor.exists():
         raise FileNotFoundError(f"Missing receptor: {config.receptor}")
@@ -108,6 +156,7 @@ def main() -> None:
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
     ligand_ids = load_ligands(config)
+    smina_version = executable_version(config.smina_executable)
     rows = []
 
     print("=" * 80)
@@ -115,7 +164,14 @@ def main() -> None:
     print("=" * 80)
 
     for index, ligand_id in enumerate(ligand_ids, start=1):
-        lid, affinity, status, message = run_one(config, ligand_id)
+        lid, affinity, status, message = run_one(
+            config,
+            ligand_id,
+            config_path=config_path,
+            runner_path=runner_path,
+            parser_path=parser_path,
+            smina_version=smina_version,
+        )
         rows.append(
             {
                 "ligand_id": lid,

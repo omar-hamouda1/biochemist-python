@@ -51,7 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   * T87: `-9.27052689`
 * Current ProLIF interaction analysis for the standardized Top 5.
 * Current rule-based drug-likeness and molecular-property summary for the standardized Top 5.
-* Historical MD analysis of the Trypsin–13U complex, including RMSD, RMSF, hydrogen-bond, ProLIF, and MM/PBSA analyses.
+* Historical MD analysis of the Trypsin–13U complex, including RMSD, RMSF, hydrogen-bond, ProLIF, and MM/GBSA-style analysis using MMPBSA.py with the Generalized Born model.
 
 ## [0.1.0] - 2026-08-15
 

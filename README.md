@@ -13,7 +13,7 @@
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange?logo=jupyter)](https://jupyter.org/)
 [![RDKit](https://img.shields.io/badge/RDKit-2024-green)](https://www.rdkit.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-28%20passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-37%20passed-brightgreen)](tests/)
 [![Conda](https://img.shields.io/badge/conda-environment-green?logo=anaconda)](environment.yml)
 
 ---
@@ -50,9 +50,9 @@ The project combines **educational Jupyter notebooks** with reusable Python modu
 | **Docking engine**        | Smina                        |
 | **Docking configuration** | `configs/docking_config.yml` |
 | **Docking audit**         | `scripts/audit_docking.py`   |
-| **Automated tests**       | 28 passing                   |
+| **Automated tests**       | 37 passing                   |
 
-The standardized screening workflow is configuration-driven and uses a single authoritative docking configuration rather than duplicating docking parameters across multiple scripts.
+The standardized screening workflow is configuration-driven and uses a single authoritative docking configuration rather than duplicating docking parameters across multiple scripts. Exact validation environments are captured separately by the provenance workflow; `environment.yml` is the reproducible environment specification, while the captured environment snapshot records the concrete packages used for a particular validated run.
 
 ---
 
@@ -119,11 +119,13 @@ conda env create -f environment.yml
 
 Activate the environment defined by your local `environment.yml`.
 
-For the development environment used during validation of this project:
+The environment created by `environment.yml` is named `biochem`:
 
 ```bash
-conda activate biochem-vscode
+conda activate biochem
 ```
+
+A local development environment may use a different name; the repository specification remains `biochem`.
 
 ### 3. Launch JupyterLab
 
@@ -197,6 +199,18 @@ python -m scripts.run_standardized_docking
 ```
 
 This workflow is resumable: valid existing docking outputs are reused rather than recomputed.
+
+### Record reproducibility provenance
+
+After preparing the receptor and ligands and completing standardized docking, capture the exact local environment and build the tracked provenance record:
+
+```bash
+python -m scripts.capture_environment
+python -m scripts.build_provenance_manifest
+python -m scripts.audit_docking --check-artifacts --check-provenance
+```
+
+The provenance manifest records configuration, receptor, prepared-ligand, docking-output, code, tool-version, and environment hashes. Generated PDBQT sidecars remain local integrity guards; the tracked manifest is the reviewable run-level record.
 
 ### Audit the standardized results
 
@@ -274,11 +288,11 @@ The current standardized screening ranks the following compounds highest by dock
 
 | Rank | Ligand  | Docking score (kcal/mol) | Lipinski   | Veber | PAINS |
 | ---: | ------- | -----------------------: | ---------- | ----- | ----- |
-|    1 | **R11** |                **-9.79** | Excellent  | Pass  | Clean |
-|    2 | **13U** |                **-9.51** | Excellent  | Pass  | Clean |
-|    3 | **BAH** |                **-9.41** | Acceptable | Fail  | Clean |
-|    4 | **12U** |                **-9.37** | Excellent  | Pass  | Clean |
-|    5 | **T87** |                **-9.27** | Excellent  | Fail  | Clean |
+|    1 | **R11** |                **-9.83** | Excellent  | Pass  | Clean |
+|    2 | **13U** |                **-9.44** | Excellent  | Pass  | Clean |
+|    3 | **BAH** |                **-9.42** | Acceptable | Fail  | Clean |
+|    4 | **12U** |                **-9.34** | Excellent  | Pass  | Clean |
+|    5 | **607** |                **-9.33** | Excellent  | Fail  | Clean |
 
 These values are **docking scores**, not experimental binding measurements.
 
@@ -292,8 +306,8 @@ Notebook 13 performs binding-site and protein–ligand interaction analysis for 
 
 The validated structure-preparation workflow includes:
 
-* deterministic protein alternate-location resolution
-* PDB2PQR-based protein protonation
+* deterministic protein alternate-location resolution via `scripts/prepare_protein.py`
+* PDB2PQR-based protein protonation at pH 7.4 using PARSE
 * RDKit ligand bond-order assignment
 * Open Babel hydrogen addition
 * ProLIF interaction analysis
@@ -346,11 +360,15 @@ They should **not** be interpreted as molecular-dynamics validation of the curre
 * Ligand RMSF: **1.07 Å**
 * Ligand atoms exceeding 3 Å RMSF: **0 / 65**
 
-### MM-PBSA
+### MM/GBSA-style Analysis
 
-* ΔG_binding: **−32.13 ± 17.22 kcal/mol**
+The historical calculation uses **MMPBSA.py with the Generalized Born model (`igb=5`)** rather than a Poisson–Boltzmann model.
+
+* ΔG estimate: **−32.13 ± 17.22 kcal/mol**
 * van der Waals contribution: **−34.32 kcal/mol**
 * Electrostatic contribution: **−11.22 kcal/mol**
+
+This is a model-based computational estimate, not an experimental binding free energy.
 
 ### Key interaction residues
 
@@ -360,15 +378,15 @@ For the historical 13U–Trypsin system, ProLIF identified high-occupancy intera
 * SER172
 * SER192
 * GLY196
-* **TRP193** — anchor residue in the historical analysis
+* **TRP193** — largest favorable protein-side contribution in the stored decomposition
 
-These MD and MM-PBSA results are historical/reference-system results and should be interpreted separately from the current 111-ligand standardized docking campaign.
+These MD and MM/GBSA-style results are historical/reference-system results and should be interpreted separately from the current 111-ligand standardized docking campaign. They do not experimentally validate the docking ranking.
 
 ---
 
 ## 🧪 Testing and Validation
 
-The repository currently contains **28 automated tests**, all passing in the validated development environment:
+The repository currently contains **37 automated tests**, all passing in the validated development environment:
 
 ```bash
 pytest -q
@@ -377,7 +395,7 @@ pytest -q
 Current result:
 
 ```text
-28 passed
+37 passed
 ```
 
 The test suite covers:
@@ -403,8 +421,8 @@ The standardized docking audit also provides an independent project-level consis
 | **Programming**          | Python 3.11                                  |
 | **Data Analysis**        | NumPy, Pandas, SciPy                         |
 | **Structure Analysis**   | Biopython, MDAnalysis                        |
-| **Cheminformatics**      | RDKit, rcsbsearchapi                         |
-| **Docking**              | Smina, AutoDock Vina, Open Babel             |
+| **Cheminformatics**      | RDKit, rcsb-api                         |
+| **Docking**              | Smina, Open Babel             |
 | **Interaction Analysis** | ProLIF                                       |
 | **Visualization**        | py3Dmol, NGLView, iCN3D, Matplotlib, Seaborn |
 | **Molecular Dynamics**   | OpenMM                                       |
@@ -426,11 +444,17 @@ biochemist-python/
 │   ├── admet.py                  # ADMET / Lipinski calculations
 │   ├── docking.py                # Docking result parsing/utilities
 │   ├── docking_config.py         # Validated docking configuration model
+│   ├── provenance.py             # Artifact provenance and integrity helpers
 │   └── visualization.py          # 3D visualization helpers
 │
 ├── scripts/                      # Standalone workflow scripts
 │   ├── audit_docking.py          # Standardized docking audit
-│   └── run_standardized_docking.py
+│   ├── run_standardized_docking.py
+│   ├── prepare_ligands.py        # Provenance-aware ligand preparation
+│   ├── prepare_protein.py        # Deterministic protein altLoc/PDB2PQR preparation
+│   ├── prepare_receptor.py       # Deterministic receptor PDBQT preparation
+│   ├── build_provenance_manifest.py
+│   └── capture_environment.py    # Exact validation-environment snapshot
 │
 ├── tests/                        # Automated tests
 │

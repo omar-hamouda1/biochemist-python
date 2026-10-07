@@ -1,6 +1,6 @@
 ligand_id,affinity,MW,LogP,HBD,HBA,TPSA,RotB,Lipinski_Violations,Lipinski_Verdict,Veber_Violations,Veber_Verdict,PAINS_Alerts,PAINS_Verdict
-R11,-9.7876091,402.36,1.24,3,6,97.54,6,0,Excellent,0,Pass,0,Clean
-13U,-9.51114082,383.33,-1.01,4,4,111.31,7,0,Excellent,0,Pass,0,Clean
-BAH,-9.41380882,366.38,-3.45,8,4,201.04,6,1,Acceptable,1,Fail,0,Clean
-12U,-9.3740406,371.32,-1.09,4,4,111.31,7,0,Excellent,0,Pass,0,Clean
-T87,-9.27052689,498.4,0.89,2,9,138.28,11,0,Excellent,1,Fail,0,Clean
+R11,-9.83414936,402.36,1.24,3,6,97.54,6,0,Excellent,0,Pass,0,Clean
+13U,-9.43803596,383.33,-1.01,4,4,111.31,7,0,Excellent,0,Pass,0,Clean
+BAH,-9.42084408,366.38,-3.45,8,4,201.04,6,1,Acceptable,1,Fail,0,Clean
+12U,-9.33996773,371.32,-1.09,4,4,111.31,7,0,Excellent,0,Pass,0,Clean
+607,-9.33216953,457.45,-2.01,4,7,209.63,8,0,Excellent,1,Fail,0,Clean
