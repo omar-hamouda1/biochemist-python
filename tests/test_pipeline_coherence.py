@@ -78,3 +78,22 @@ def test_current_analysis_notebooks_have_valid_python_code():
                 continue
             source = "".join(cell.get("source", []))
             ast.parse(source, filename=f"{notebook_path}:{index}")
+
+def test_current_top5_artifact_contract_is_sdf():
+    """Downstream Top-5 scripts and tracked artifacts must use one extension."""
+    top5 = ["R11", "13U", "BAH", "12U", "607"]
+    fixed_dir = ROOT / "docking/results/fixed"
+
+    for ligand_id in top5:
+        assert (fixed_dir / f"{ligand_id}_fixed.sdf").exists()
+        assert not (fixed_dir / f"{ligand_id}_fixed.sd").exists()
+
+    for script_name in [
+        "scripts/prepare_top5.py",
+        "scripts/prolif_analysis.py",
+        "scripts/admet_top5.py",
+    ]:
+        source = (ROOT / script_name).read_text()
+        assert "_fixed.sdf" in source
+        assert "_fixed.sd" not in source
+
