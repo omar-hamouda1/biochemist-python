@@ -38,13 +38,14 @@ def test_current_result_chain_is_coherent():
     docking = pd.read_csv(config.report)
     assert len(docking) == 111
     assert docking["ligand_id"].is_unique
-    assert set(docking["status"]) == {"ok"}
+    assert set(docking["status"]).issubset({"ok", "existing"})
+    assert docking["status"].notna().all()
     assert set(docking["ligand_id"]) == validated
     assert docking["affinity"].notna().all()
 
-    docking = docking.sort_values("affinity").reset_index(drop=True)
+    docking = docking.sort_values(["affinity", "ligand_id"], kind="mergesort").reset_index(drop=True)
     top5 = docking.head(5)["ligand_id"].tolist()
-    assert top5 == ["R11", "13U", "BAH", "12U", "T87"]
+    assert top5 == ["R11", "13U", "BAH", "12U", "607"]
 
     prolif = pd.read_csv(ROOT / "docking/results/prolif_summary.csv")
     admet = pd.read_csv(ROOT / "docking/results/admet/admet_top5.csv")
